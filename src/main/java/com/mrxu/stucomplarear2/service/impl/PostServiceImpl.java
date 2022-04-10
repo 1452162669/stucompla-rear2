@@ -51,6 +51,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         post.setTitle(postDto.getTitle());
         post.setCategoryId(postDto.getCategoryId());
         post.setDetail(postDto.getDetail());
+        post.setImages(postDto.getImages());
         String accessToken = request.getHeader("Authorization");
         //获取token里面的用户ID
         String userId = JWTUtil.getUserId(accessToken);
@@ -112,6 +113,14 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         if ("-comment_num".equals(sort)) {
             queryWrapper.orderByDesc("comment_num");
         }
+        if (postFindDto.getBestPost() != null) {
+            System.out.println(postFindDto.getBestPost());
+            if (postFindDto.getBestPost()) {
+                queryWrapper.eq("best_post", postFindDto.getBestPost());
+            } else {
+                queryWrapper.eq("best_post", postFindDto.getBestPost());
+            }
+        }
 
         //当前页 页面大小
         IPage<Post> page = new Page<Post>(pageNum, pageSize);
@@ -122,12 +131,12 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         map.put("total", postIPage.getTotal());//总记录数
         map.put("pages", postIPage.getPages());//总页数
 
-        List<PostVo> postVoList =new ArrayList<>();
+        List<PostVo> postVoList = new ArrayList<>();
         map.put("pageSize", postIPage.getSize());//页面大小
 
         for (Post post : postIPage.getRecords()) {
             PostVo postVo = new PostVo();
-            BeanUtils.copyProperties(post,postVo);
+            BeanUtils.copyProperties(post, postVo);
             //查对应的发布人信息
             User user = userMapper.selectById(post.getUserId());
             postVo.setUser(user);
@@ -140,7 +149,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         }
 
         map.put("postList", postVoList);//数据
-        System.out.println(postVoList);
+//        System.out.println(postVoList);
         return map;
     }
 }

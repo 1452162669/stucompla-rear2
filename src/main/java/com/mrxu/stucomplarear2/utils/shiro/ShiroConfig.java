@@ -68,10 +68,12 @@ public class ShiroConfig {
         filterRuleMap.put("/images", "anon");
         filterRuleMap.put("/admin/info/login", "anon");
         filterRuleMap.put("/login", "anon");
+//        filterRuleMap.put("/post/**", "anon");
 
 
         // 所有请求通过我们自己的JWT Filter
         filterRuleMap.put("/**", "jwt");
+//        filterRuleMap.put("/post/publish", "jwt");
         // 访问 /unauthorized/** 不通过JWTFilter
         filterRuleMap.put("/unauthorized/**", "anon");
         factoryBean.setFilterChainDefinitionMap(filterRuleMap);
@@ -108,7 +110,7 @@ public class ShiroConfig {
     @Bean
     public ModularRealmAuthenticator modularRealmAuthenticator() {
         //自己重写的ModularRealmAuthenticator
-        MyModularRealmAuthenticator  mymodularRealmAuthenticator= new MyModularRealmAuthenticator();
+        MyModularRealmAuthenticator mymodularRealmAuthenticator = new MyModularRealmAuthenticator();
         mymodularRealmAuthenticator.setAuthenticationStrategy(new FirstSuccessfulStrategy());
         return mymodularRealmAuthenticator;
     }
@@ -124,12 +126,12 @@ public class ShiroConfig {
     }
 
     @Bean("adminRealm")
-    public AdminRealm adminRealm(){
+    public AdminRealm adminRealm() {
         return new AdminRealm();
     }
 
     @Bean("userRealm")
-    public UserRealm userRealm(){
+    public UserRealm userRealm() {
         return new UserRealm();
     }
 }

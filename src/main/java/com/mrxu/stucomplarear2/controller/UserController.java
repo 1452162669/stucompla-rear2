@@ -1,6 +1,5 @@
 package com.mrxu.stucomplarear2.controller;
 
-import com.mrxu.stucomplarear2.dto.AdminFindDto;
 import com.mrxu.stucomplarear2.dto.LoginDto;
 import com.mrxu.stucomplarear2.dto.RegisterDto;
 import com.mrxu.stucomplarear2.dto.UserFindDto;
@@ -36,12 +35,12 @@ public class UserController {
 
     @ApiOperation("注册")
     @PostMapping("/register")
-    public Object register(@RequestBody RegisterDto registerDto){
+    public Object register(@RequestBody RegisterDto registerDto) {
         //初始化返回值
         String regResult = userService.register(registerDto);
-        if(regResult.equals("注册成功")){
-            return Result.succ(200,regResult,null);
-        }else{
+        if (regResult.equals("注册成功")) {
+            return Result.succ(200, regResult, null);
+        } else {
             return Result.fail(regResult);
         }
     }
@@ -49,11 +48,11 @@ public class UserController {
     @ApiOperation("修改密码")
     @RequiresRoles("user")
     @PostMapping("/changePassword")
-    public Result changePassword(String oldPassword, String inPassword, String secondPassword, ServletRequest request){
-        String regResult = userService.changePassword(request,oldPassword,inPassword,secondPassword);
-        if(regResult.equals("密码修改成功")){
-            return Result.succ(200,regResult,null);
-        }else{
+    public Result changePassword(String oldPassword, String inPassword, String secondPassword, ServletRequest request) {
+        String regResult = userService.changePassword(request, oldPassword, inPassword, secondPassword);
+        if (regResult.equals("密码修改成功")) {
+            return Result.succ(200, regResult, null);
+        } else {
             return Result.fail(regResult);
         }
     }
@@ -72,7 +71,7 @@ public class UserController {
 
     @ApiOperation("登录")
     @PostMapping("/login")
-    public Result login(@RequestBody LoginDto loginDto, ServletResponse response){
+    public Result login(@RequestBody LoginDto loginDto, ServletResponse response) {
         // 查询数据库获取用户信息
         User userFromDb = userService.getUserByUsername(loginDto.getUsername());
         // 用户不存在
@@ -89,16 +88,16 @@ public class UserController {
                 loginDto.getPassword(), //输入的原始密码
                 loginDto.getUsername(),//用户Id当盐值
                 16));
-        if(!inPassword.equals(userFromDb.getPassword())){
+        if (!inPassword.equals(userFromDb.getPassword())) {
             return Result.fail("用户名或密码错误！");
 //            throw new IllegalArgumentException("用户名或密码错误！");
         }
         long currentTimeMillis = System.currentTimeMillis();
-        String token= JWTUtil.createToken(String.valueOf(userFromDb.getUserId()),currentTimeMillis,"User");
-        redisUtil.set("User"+userFromDb.getUserId(),currentTimeMillis,60*30);//redis里存30分钟
-        ((HttpServletResponse)response).setHeader("Authorization", token);
-        ((HttpServletResponse)response).setHeader("Access-Control-Expose-Headers", "Authorization");//前端可以拿到这个响应头
-        return Result.succ(200,"登陆成功",token);
+        String token = JWTUtil.createToken(String.valueOf(userFromDb.getUserId()), currentTimeMillis, "User");
+        redisUtil.set("User" + userFromDb.getUserId(), currentTimeMillis, 60 * 30);//redis里存30分钟
+        ((HttpServletResponse) response).setHeader("Authorization", token);
+        ((HttpServletResponse) response).setHeader("Access-Control-Expose-Headers", "Authorization");//前端可以拿到这个响应头
+        return Result.succ(200, "登陆成功", token);
     }
 
     @ApiOperation("无权限")
@@ -110,9 +109,9 @@ public class UserController {
     @ApiOperation("登出")
     @DeleteMapping("/logout")
     @RequiresAuthentication
-    public Result logout(HttpServletRequest request){
-        String token=request.getHeader("Authorization");
-        String userId=JWTUtil.getUserId(token);
+    public Result logout(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        String userId = JWTUtil.getUserId(token);
         redisUtil.del(userId);
         return Result.succ("退出成功");
     }

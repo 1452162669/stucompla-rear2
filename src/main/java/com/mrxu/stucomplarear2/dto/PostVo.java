@@ -62,5 +62,9 @@ public class PostVo {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Date updateTime;
 
+    /**
+     * 是否精帖
+     */
+    private Boolean bestPost;
 
 }

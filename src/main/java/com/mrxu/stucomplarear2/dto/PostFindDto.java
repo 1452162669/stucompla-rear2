@@ -40,7 +40,6 @@ public class PostFindDto {
      */
     private Integer categoryId;
 
-
     /**
      * 当前页
      */
@@ -52,4 +51,9 @@ public class PostFindDto {
     private Integer pageSize;
 
     private String sort;
+
+    /**
+     * 是否精帖
+     */
+    private Boolean bestPost;
 }
