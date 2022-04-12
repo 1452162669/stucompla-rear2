@@ -86,4 +86,10 @@ public class Post implements Serializable {
     @TableField(fill = FieldFill.INSERT)
     private boolean bestPost;
 
+    /**
+     * 收藏数
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Integer collectNum;
+
 }

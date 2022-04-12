@@ -43,7 +43,7 @@ public class PostVo {
     /**
      * 发布时间
      */
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
     /**
@@ -59,12 +59,17 @@ public class PostVo {
     /**
      * 更新时间
      */
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
 
     /**
      * 是否精帖
      */
     private Boolean bestPost;
+
+    /**
+     * 收藏数
+     */
+    private Integer collectNum;
 
 }

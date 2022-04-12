@@ -87,4 +87,10 @@ public class PostController {
         return Result.succ(map);
     }
 
+    @ApiOperation("获取帖子收藏数量")
+    @GetMapping("/getCollectNum")
+    public Result getCollectNum(Integer postId) {
+//        int collectNum = postService.getCollectNum(postId);
+        return null;
+    }
 }

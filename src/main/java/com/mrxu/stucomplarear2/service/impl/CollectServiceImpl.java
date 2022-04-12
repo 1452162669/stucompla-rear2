@@ -3,6 +3,7 @@ package com.mrxu.stucomplarear2.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.entity.Collect;
+import com.mrxu.stucomplarear2.entity.Post;
 import com.mrxu.stucomplarear2.mapper.CollectMapper;
 import com.mrxu.stucomplarear2.mapper.PostMapper;
 import com.mrxu.stucomplarear2.service.CollectService;
@@ -38,13 +39,30 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
             if (userId == null || postId == null) {
                 Result.fail("参数错误");
             }
-            if (postMapper.selectById(postId) == null) {
+            Post post = postMapper.selectById(postId);
+            if (post == null) {
                 Result.fail("帖子不存在");
+            }
+            QueryWrapper<Collect> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("post_id", postId);
+            queryWrapper.eq("user_id", Integer.valueOf(userId));
+            if (collectMapper.selectOne(queryWrapper) != null) {
+                return Result.fail("已收藏");
             }
             Collect collect = new Collect();
             collect.setUserId(Integer.valueOf(userId));
             collect.setPostId(postId);
             collectMapper.insert(collect);
+            post.setCollectNum(post.getCollectNum() + 1);
+            postMapper.updateById(post);
+
+            QueryWrapper<Collect> queryWrapper2 = new QueryWrapper<>();
+            queryWrapper2.eq("post_id", postId);
+            Integer selectCount = collectMapper.selectCount(queryWrapper2);
+
+
+//            Post post = postMapper.selectById(postId);
+
         } catch (Exception e) {
             e.printStackTrace();
             Result.fail(e.toString());
@@ -61,9 +79,11 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
             if (userId == null || postId == null) {
                 Result.fail("参数错误");
             }
-            if (postMapper.selectById(postId) == null) {
+            Post post = postMapper.selectById(postId);
+            if (post == null) {
                 Result.fail("帖子不存在");
             }
+
             QueryWrapper<Collect> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("post_id", postId);
             queryWrapper.eq("user_id", Integer.valueOf(userId));
@@ -71,6 +91,10 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
                 return Result.fail("您还没收藏，取消收藏失败");
             }
             collectMapper.delete(queryWrapper);
+
+            post.setCollectNum(post.getCollectNum() - 1);
+            postMapper.updateById(post);
+
         } catch (Exception e) {
             e.printStackTrace();
             Result.fail(e.toString());
@@ -102,4 +126,5 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
         }
         return Result.succ(true);
     }
+
 }

@@ -1,6 +1,7 @@
 package com.mrxu.stucomplarear2.controller;
 
 
+import com.mrxu.stucomplarear2.mapper.PostMapper;
 import com.mrxu.stucomplarear2.service.CollectService;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import io.swagger.annotations.ApiOperation;
@@ -24,11 +25,14 @@ public class CollectController {
 
     @Resource
     private CollectService collectService;
+    @Resource
+    private PostMapper postMapper;
 
     @ApiOperation("查看是否收藏")
     @RequiresRoles("user")
     @GetMapping("/check/{postId}")
     public Result check(@PathVariable("postId") Integer postId, HttpServletRequest request) {
+        
         Result result = collectService.checkCollect(postId, request);
         return result;
     }
@@ -48,5 +52,19 @@ public class CollectController {
         Result result = collectService.deleteCollect(postId, request);
         return result;
     }
+
+//    @ApiOperation("获取帖子收藏数量")
+//    @GetMapping("/getCollectNum")
+//    public Result getCollectNum(Integer postId) {
+//        if (postId == null) {
+//            Result.fail("参数错误");
+//        }
+//        Post post = postMapper.selectById(postId);
+//        if (post == null) {
+//            return Result.fail("帖子不存在");
+//        } else {
+//            return Result.succ(post.getCollectNum());
+//        }
+//    }
 
 }

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.CommentDto;
 import com.mrxu.stucomplarear2.entity.Comment;
+import com.mrxu.stucomplarear2.entity.Post;
 import com.mrxu.stucomplarear2.mapper.CommentMapper;
 import com.mrxu.stucomplarear2.mapper.PostMapper;
 import com.mrxu.stucomplarear2.service.CommentService;
@@ -38,13 +39,14 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     @Override
     public Result createComment(HttpServletRequest request, CommentDto commentDto) {
         try {
-            if (postMapper.selectById(commentDto.getPostId()) == null) {
+            Post post = postMapper.selectById(commentDto.getPostId());
+            if (post == null) {
                 return Result.fail("帖子不存在");
             }
             if (commentDto.getParentId() != null && commentMapper.selectById(commentDto.getParentId()) == null) {
                 return Result.fail("父评论不存在");
             }
-            if(commentDto.getText()==null||commentDto.getText()==""){
+            if (commentDto.getText() == null || commentDto.getText() == "") {
                 return Result.fail("内容不能为空");
             }
             Comment comment = new Comment();
@@ -57,6 +59,11 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             String userId = JWTUtil.getUserId(accessToken);
             comment.setUserId(Integer.valueOf(userId));
             commentMapper.insert(comment);
+
+            // 更新评论数
+            post.setCommentNum(post.getCommentNum() + 1);
+            postMapper.updateById(post);
+
             return Result.succ("发布成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,12 +86,12 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             }
             //创建分页条件
             QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("post_id",postId);
+            queryWrapper.eq("post_id", postId);
             //当前页 页面大小
             IPage<Comment> iPage = new Page<Comment>(page, size);
             queryWrapper.orderByDesc("create_time"); //根据上传时间降序排列
 
-            IPage<Comment> commentIPage = commentMapper.selectPage(iPage,queryWrapper);
+            IPage<Comment> commentIPage = commentMapper.selectPage(iPage, queryWrapper);
             Map<String, Object> map = new HashMap<>();
             map.put("current", commentIPage.getCurrent());//当前页
             map.put("total", commentIPage.getTotal());//总记录数
