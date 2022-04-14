@@ -97,21 +97,18 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         String sort = postFindDto.getSort();
         if ("+post_id".equals(sort)) {
             queryWrapper.orderByAsc("post_id");//根据post_id升序排列
-        }
-        if ("-post_id".equals(sort)) {
+        } else if ("-post_id".equals(sort)) {
             queryWrapper.orderByDesc("post_id");
-        }
-        if ("+view_num".equals(sort)) {
+        } else if ("+view_num".equals(sort)) {
             queryWrapper.orderByAsc("view_num");
-        }
-        if ("-view_num".equals(sort)) {
+        } else if ("-view_num".equals(sort)) {
             queryWrapper.orderByDesc("view_num");
-        }
-        if ("+comment_num".equals(sort)) {
+        } else if ("+comment_num".equals(sort)) {
             queryWrapper.orderByAsc("comment_num");
-        }
-        if ("-comment_num".equals(sort)) {
+        } else if ("-comment_num".equals(sort)) {
             queryWrapper.orderByDesc("comment_num");
+        } else {
+            queryWrapper.orderByDesc("create_time"); //默认发布时间降序
         }
         if (postFindDto.getBestPost() != null) {
             System.out.println(postFindDto.getBestPost());

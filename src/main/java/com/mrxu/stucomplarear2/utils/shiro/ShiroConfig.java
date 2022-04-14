@@ -67,7 +67,7 @@ public class ShiroConfig {
         //放行
         filterRuleMap.put("/images", "anon");
         filterRuleMap.put("/admin/info/login", "anon");
-        filterRuleMap.put("/login", "anon");
+        filterRuleMap.put("/user/login", "anon");
 //        filterRuleMap.put("/post/**", "anon");
 
 
@@ -75,7 +75,7 @@ public class ShiroConfig {
         filterRuleMap.put("/**", "jwt");
 //        filterRuleMap.put("/post/publish", "jwt");
         // 访问 /unauthorized/** 不通过JWTFilter
-        filterRuleMap.put("/unauthorized/**", "anon");
+        filterRuleMap.put("/user/unauthorized/**", "anon");
         factoryBean.setFilterChainDefinitionMap(filterRuleMap);
         return factoryBean;
     }

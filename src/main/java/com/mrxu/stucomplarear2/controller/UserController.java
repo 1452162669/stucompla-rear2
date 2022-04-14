@@ -21,7 +21,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 @RestController
@@ -102,7 +101,7 @@ public class UserController {
 
     @ApiOperation("无权限")
     @GetMapping(path = "/unauthorized/{message}")
-    public Result unauthorized(@PathVariable String message) throws UnsupportedEncodingException {
+    public Result unauthorized(@PathVariable String message) {
         return Result.fail(message);
     }
 
@@ -124,5 +123,17 @@ public class UserController {
         return Result.succ(map);
     }
 
+    @ApiOperation("获取个人信息")
+    @RequiresRoles("user")
+    @GetMapping("/info")
+    public Result getInfo(HttpServletRequest request) {
+        String jwt = request.getHeader("Authorization");
+        String userId = JWTUtil.getUserId(jwt);
+        User user = userService.getUserByUserId(userId);
+        if (user == null) {
+            return Result.fail("用户不存在");
+        }
+        return Result.succ(user);
+    }
 
 }
