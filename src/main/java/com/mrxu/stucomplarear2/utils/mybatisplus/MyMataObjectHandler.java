@@ -21,6 +21,7 @@ public class MyMataObjectHandler implements MetaObjectHandler {
         //this.setFieldValByName("roleId",1,metaObject);//角色id
         this.setFieldValByName("commentNum", 0, metaObject);//评论数
         this.setFieldValByName("viewNum", 0, metaObject);//热度 浏览数
+        this.setFieldValByName("goodsStatus", true, metaObject);//上架状态
 
         this.setFieldValByName("likeNum", 0, metaObject);//点赞数
         this.setFieldValByName("collectNum", 0, metaObject);//收藏数
