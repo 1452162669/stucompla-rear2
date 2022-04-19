@@ -81,5 +81,10 @@ public class Wall implements Serializable {
      */
     private Integer userId;
 
+    /**
+     * 墙图片
+     */
+    private String wallImages;
+
 
 }

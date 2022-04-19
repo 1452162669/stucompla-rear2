@@ -57,7 +57,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     public Result findGoods(GoodsFindDto goodsFindDto) {
         int pageNum = goodsFindDto.getPageNum() == null ? 1 : goodsFindDto.getPageNum();
-        int pageSize = goodsFindDto.getPageSize() == null ? 10 : goodsFindDto.getPageSize();
+        int pageSize = goodsFindDto.getPageSize() == null ?20 : goodsFindDto.getPageSize();
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
         if (goodsFindDto.getGoodsId() != null) {
             queryWrapper.eq("goods_id", goodsFindDto.getGoodsId());
@@ -69,8 +69,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             queryWrapper.eq("user_id", goodsFindDto.getUserId());
         }
         if (goodsFindDto.getKeyName() != null) {
-            queryWrapper.like("goods_name", goodsFindDto.getKeyName());
-            queryWrapper.like("goods_detail", goodsFindDto.getKeyName());
+            queryWrapper.and(qw -> qw.like("goods_name", goodsFindDto.getKeyName())
+                    .or().like("goods_detail", goodsFindDto.getKeyName()));
+//            queryWrapper.like("goods_name", goodsFindDto.getKeyName()).or().like("goods_detail", goodsFindDto.getKeyName());
         }
         if (goodsFindDto.getGoodsStatus() != null) {
             queryWrapper.eq("goods_status", goodsFindDto.getGoodsStatus());
@@ -98,6 +99,13 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         map.put("goodsList", goodsIPage.getRecords());//数据
 
         return Result.succ(map);
+    }
+
+    @Override
+    public Goods updateViewNum(Goods goods) {
+        goods.setViewNum(goods.getViewNum()+1);
+        goodsMapper.updateById(goods);
+        return goods;
     }
 
 }

@@ -1,32 +1,17 @@
-package com.mrxu.stucomplarear2.entity;
+package com.mrxu.stucomplarear2.dto;
 
-import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.mrxu.stucomplarear2.entity.GoodsCategory;
+import com.mrxu.stucomplarear2.entity.User;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
 import java.util.Date;
 
-/**
- * <p>
- *
- * </p>
- *
- * @author Mr.Xu
- * @since 2022-04-15
- */
 @Data
-@EqualsAndHashCode(callSuper = false)
-@TableName("goods")
-public class Goods implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class GoodsVo {
     /**
      * 二手商品id
      */
-    @TableId(value = "goods_id", type = IdType.AUTO)
     private Integer goodsId;
 
     /**
@@ -52,7 +37,7 @@ public class Goods implements Serializable {
     /**
      * 二手商品分类id
      */
-    private Integer goodsCategoryId;
+    private GoodsCategory goodsCategory;
 
     /**
      * 二手商品数量
@@ -67,26 +52,23 @@ public class Goods implements Serializable {
     /**
      * 二手商品发布时间
      */
-    @TableField(fill = FieldFill.INSERT)    //用于mybatisplus自动填充时间
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
     /**
      * 二手商品信息更新时间
      */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
 
     /**
      * 发布人id
      */
-    private Integer userId;
+    private User user;
 
     /*
     点击数
      */
-    @TableField(fill = FieldFill.INSERT)
     private Integer viewNum;
 
 }

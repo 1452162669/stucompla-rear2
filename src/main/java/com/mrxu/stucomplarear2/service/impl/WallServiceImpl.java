@@ -10,9 +10,11 @@ import com.mrxu.stucomplarear2.dto.WallFindDto;
 import com.mrxu.stucomplarear2.entity.Wall;
 import com.mrxu.stucomplarear2.mapper.WallMapper;
 import com.mrxu.stucomplarear2.service.WallService;
+import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,16 +33,23 @@ public class WallServiceImpl extends ServiceImpl<WallMapper, Wall> implements Wa
     private WallMapper wallMapper;
 
     @Override
-    public String apply(WallApplyDto wallApplyDto) {
-        if (wallApplyDto.getUserId() == null) {
-            return "用户ID不能为空";
+    public String apply(WallApplyDto wallApplyDto , HttpServletRequest request) {
+        String accessToken = request.getHeader("Authorization");
+        //获取token里面的用户ID
+        String userId = JWTUtil.getUserId(accessToken);
+
+        if (userId == null) {
+            return "参数错误";
         }
         if (wallApplyDto.getWallContent() == null) {
             return "内容不能为空";
         }
         Wall wall = new Wall();
-        wall.setUserId(wallApplyDto.getUserId());
+        wall.setUserId(Integer.valueOf(userId));
         wall.setWallContent(wallApplyDto.getWallContent());
+        if (wallApplyDto.getWallImages()!=null){
+            wall.setWallImages(wallApplyDto.getWallImages());
+        }
         wall.setAuditState(0);
         wallMapper.insert(wall);
         return "申请成功";

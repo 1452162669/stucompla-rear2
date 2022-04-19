@@ -33,8 +33,8 @@ public class WallController {
     @ApiOperation("申请上墙")
     @RequiresRoles("user")
     @PostMapping("/apply")
-    public Result apply(@RequestBody WallApplyDto wallApplyDto) {
-        String applyResult = wallService.apply(wallApplyDto);
+    public Result apply(@RequestBody WallApplyDto wallApplyDto,HttpServletRequest request) {
+        String applyResult = wallService.apply(wallApplyDto,request);
         if (applyResult.equals("申请成功")) {
             return Result.succ(200, applyResult, null);
         } else {

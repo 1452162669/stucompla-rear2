@@ -6,6 +6,7 @@ import com.mrxu.stucomplarear2.dto.WallFindDto;
 import com.mrxu.stucomplarear2.entity.Wall;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -18,7 +19,7 @@ import java.util.Map;
  */
 public interface WallService extends IService<Wall> {
 
-    String apply(WallApplyDto wallDto);
+    String apply(WallApplyDto wallDto , HttpServletRequest request);
 
     String audit(WallAuditDto wallAuditDto);
 

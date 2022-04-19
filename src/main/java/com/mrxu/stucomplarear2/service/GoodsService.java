@@ -21,4 +21,6 @@ public interface GoodsService extends IService<Goods> {
     Result add(GoodsAddDto goodsDto, HttpServletRequest request);
 
     Result findGoods(GoodsFindDto goodsFindDto);
+
+    Goods updateViewNum(Goods goods);
 }

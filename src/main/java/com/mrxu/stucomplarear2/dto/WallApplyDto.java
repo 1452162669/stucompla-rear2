@@ -10,8 +10,8 @@ public class WallApplyDto {
     private String wallContent;
 
     /**
-     * 申请人ID
+     * 墙图片
      */
-    private Integer userId;
+    private String wallImages;
 
 }

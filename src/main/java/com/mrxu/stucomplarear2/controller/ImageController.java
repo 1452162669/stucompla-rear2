@@ -1,15 +1,12 @@
 package com.mrxu.stucomplarear2.controller;
 
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.mrxu.stucomplarear2.dto.ImgResult;
 import com.mrxu.stucomplarear2.service.ImageService;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,8 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>
@@ -48,7 +43,7 @@ public class ImageController {
     @ApiOperation("上传图片")
     @RequiresRoles("user")
     @PostMapping("/upload")
-    public String uploadImage(HttpServletRequest request,@RequestPart("files") MultipartFile[] files) {
+    public String uploadImage(HttpServletRequest request, @RequestPart("files") MultipartFile[] files) {
         //使用@RequestPart -- 解决(Swagger 3.0.0)——【文件上传，接收file类型时显示string】
 
         Result uploadResult = imageService.uploadImage(request, files);
@@ -75,7 +70,7 @@ public class ImageController {
     @ApiOperation("删除图片")
     //@RequiresRoles("user")
     @DeleteMapping("/{imageId}")
-    public Result DeleteImage(@PathVariable("imageId") String imageId){
+    public Result DeleteImage(@PathVariable("imageId") String imageId) {
         return imageService.deleteById(imageId);
     }
 }
