@@ -7,6 +7,7 @@ import com.mrxu.stucomplarear2.service.WallService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import io.swagger.annotations.ApiOperation;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,10 +44,10 @@ public class WallController {
     }
 
     @ApiOperation("上墙审核")
-    @RequiresRoles("admin")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @PostMapping("/audit")
-    public Result audit(@RequestBody WallAuditDto wallAuditDto) {
-        String auditResult = wallService.audit(wallAuditDto);
+    public Result audit(@RequestBody WallAuditDto wallAuditDto,HttpServletRequest request) {
+        String auditResult = wallService.audit(wallAuditDto,request);
         if (auditResult.equals("审核成功")) {
             return Result.succ(200, auditResult, null);
         }
@@ -85,7 +86,7 @@ public class WallController {
     }
 
     @ApiOperation("墙列表（管理员页面）")
-    @RequiresRoles("admin")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @GetMapping("/auditWallList")
     public Result auditWallList(WallFindDto wallFindDto) {
         Map<String, Object> map = wallService.findWall(wallFindDto);

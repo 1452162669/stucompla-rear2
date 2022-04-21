@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JWTUtil {
-    //token有效时长 5分钟(测试阶段)   正式阶段请设置短一些
-    private static final long EXPIRE = 5 * 60 * 1000L;
+    //token有效时长 2分钟(测试阶段)   正式阶段请设置短一些
+    private static final long EXPIRE = 2 * 60 * 1000L;
     //token的密钥
     private static final String SECRET = "jwt+shiro";
 

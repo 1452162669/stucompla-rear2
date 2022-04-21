@@ -21,7 +21,7 @@ public interface WallService extends IService<Wall> {
 
     String apply(WallApplyDto wallDto , HttpServletRequest request);
 
-    String audit(WallAuditDto wallAuditDto);
+    String audit(WallAuditDto wallAuditDto,HttpServletRequest request);
 
     Map<String, Object> findWallList(Integer pageNum, Integer pageSize);
 

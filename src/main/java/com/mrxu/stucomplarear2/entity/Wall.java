@@ -1,8 +1,6 @@
 package com.mrxu.stucomplarear2.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,6 +26,7 @@ public class Wall implements Serializable {
     /**
      * 墙ID
      */
+    @TableId(value = "wall_id", type = IdType.AUTO)
     private Integer wallId;
 
     /**

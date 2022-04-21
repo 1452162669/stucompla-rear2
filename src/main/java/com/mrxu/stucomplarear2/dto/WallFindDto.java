@@ -33,4 +33,6 @@ public class WallFindDto {
      * 页面大小
      */
     private Integer pageSize;
+
+    private String sort;
 }

@@ -56,30 +56,33 @@ public class WallServiceImpl extends ServiceImpl<WallMapper, Wall> implements Wa
     }
 
     @Override
-    public String audit(WallAuditDto wallAuditDto) {
+    public String audit(WallAuditDto wallAuditDto , HttpServletRequest request) {
+        String accessToken = request.getHeader("Authorization");
+        //获取token里面的用户ID
+        String adminId = JWTUtil.getUserId(accessToken);
+
         if (wallAuditDto.getWallId() == null) {
             return "墙ID不能为空";
         }
-        if (wallAuditDto.getAdminId() == null) {
+        if (adminId == null) {
             return "审核员ID不能为空";
         }
         if (wallAuditDto.getAuditState() != 1 && wallAuditDto.getAuditState() != 2) {
             return "审核状态参数错误";
         }
-        QueryWrapper<Wall> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("wall_id", wallAuditDto.getWallId());
-        Wall findWall = wallMapper.selectOne(queryWrapper);
+        Wall findWall = wallMapper.selectById(wallAuditDto.getWallId());
         if (findWall == null) {
             return "该信息不存在";
         }
-        Wall wall = new Wall();
-        wall.setWallId(wallAuditDto.getWallId());
-        wall.setAdminId(wallAuditDto.getAdminId());
-        wall.setAuditState(wallAuditDto.getAuditState());
-        if (wallAuditDto.getAuditState() == 2) {
-            wall.setAuditFailedCause(wallAuditDto.getAuditFailedCause());
+        findWall.setAdminId(Integer.valueOf(adminId));
+        findWall.setAuditState(wallAuditDto.getAuditState());
+        if (wallAuditDto.getAuditState() == 1) {
+            findWall.setAuditFailedCause(null);
         }
-        wallMapper.update(wall, queryWrapper);
+        if (wallAuditDto.getAuditState() == 2) {
+            findWall.setAuditFailedCause(wallAuditDto.getAuditFailedCause());
+        }
+        wallMapper.updateById(findWall);
         return "审核成功";
     }
 
@@ -119,10 +122,31 @@ public class WallServiceImpl extends ServiceImpl<WallMapper, Wall> implements Wa
         if (wallFindDto.getAuditState() != null) {
             queryWrapper.eq("audit_state", wallFindDto.getAuditState());
         }
+        String sort=wallFindDto.getSort();
+        if ("+wall_id".equals(sort)) {
+            queryWrapper.orderByAsc("wall_id");//根据post_id升序排列
+        } else if ("-wall_id".equals(sort)) {
+            queryWrapper.orderByDesc("wall_id");
+        } else if ("+audit_time".equals(sort)) {
+            queryWrapper.orderByAsc("audit_time");
+        } else if ("-audit_time".equals(sort)) {
+            queryWrapper.orderByDesc("audit_time");
+        } else if ("+comment_num".equals(sort)) {
+            queryWrapper.orderByAsc("comment_num");
+        } else if ("-comment_num".equals(sort)) {
+            queryWrapper.orderByDesc("comment_num");
+        }else if ("+like_num".equals(sort)) {
+            queryWrapper.orderByAsc("like_num");
+        } else if ("-like_num".equals(sort)) {
+            queryWrapper.orderByDesc("like_num");
+        } else {
+            queryWrapper.orderByDesc("createtime"); //默认申请时间降序
+        }
+
         //当前页 页面大小
         IPage<Wall> page = new Page<Wall>(pageNum, pageSize);
 
-        queryWrapper.orderByDesc("audit_time"); //根据审核时间降序排列
+//        queryWrapper.orderByDesc("audit_time"); //根据审核时间降序排列
 
         IPage<Wall> wallIPage = wallMapper.selectPage(page, queryWrapper);
         Map<String, Object> map = new HashMap<>();

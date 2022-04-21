@@ -10,11 +10,6 @@ public class WallAuditDto {
     private Integer wallId;
 
     /**
-     * 审核人ID
-     */
-    private Integer adminId;
-
-    /**
      * 审核状态：0-待审 1-审核通过 2-未通过
      */
     private Integer auditState;
