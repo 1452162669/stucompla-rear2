@@ -1,7 +1,11 @@
 package com.mrxu.stucomplarear2.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mrxu.stucomplarear2.dto.CollectFindDto;
+import com.mrxu.stucomplarear2.dto.PostVo;
 import com.mrxu.stucomplarear2.entity.Collect;
 import com.mrxu.stucomplarear2.entity.Post;
 import com.mrxu.stucomplarear2.mapper.CollectMapper;
@@ -13,6 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -126,5 +134,33 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
         }
         return Result.succ(true);
     }
+
+    @Override
+    public Result listCollect(CollectFindDto collectFindDto) {
+        int pageNum = collectFindDto.getPageNum() == null ? 1 : collectFindDto.getPageNum();
+        int pageSize = collectFindDto.getPageSize() == null ? 8 : collectFindDto.getPageSize();
+        if (collectFindDto.getUserId()==null) {
+            return Result.fail("用户ID为null");
+        }
+        QueryWrapper<Collect> queryWrapper =new QueryWrapper<>();
+        queryWrapper.eq("user_id",collectFindDto.getUserId());
+        queryWrapper.orderByDesc("create_time"); //默认收藏时间降序
+        //当前页 页面大小
+        IPage<Collect> page = new Page<Collect>(pageNum, pageSize);
+        IPage<Collect> collectIPage = collectMapper.selectPage(page, queryWrapper);
+        Map<String, Object> map = new HashMap<>();
+        map.put("current", collectIPage.getCurrent());//当前页
+        map.put("total", collectIPage.getTotal());//总记录数
+        map.put("pages", collectIPage.getPages());//总页数
+        map.put("pageSize", collectIPage.getSize());//页面大小
+        List<Post> postList = new ArrayList<>();
+        for(Collect collect:collectIPage.getRecords()){
+            Post post=postMapper.selectById(collect.getPostId());
+            postList.add(post);
+        }
+        map.put("postList", postList);//数据
+        return Result.succ(map);
+    }
+
 
 }

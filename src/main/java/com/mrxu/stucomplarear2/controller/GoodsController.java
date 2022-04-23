@@ -2,10 +2,7 @@ package com.mrxu.stucomplarear2.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.mrxu.stucomplarear2.dto.GoodsAddDto;
-import com.mrxu.stucomplarear2.dto.GoodsFindDto;
-import com.mrxu.stucomplarear2.dto.GoodsVo;
-import com.mrxu.stucomplarear2.dto.PostVo;
+import com.mrxu.stucomplarear2.dto.*;
 import com.mrxu.stucomplarear2.entity.*;
 import com.mrxu.stucomplarear2.mapper.GoodsCategoryMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
@@ -45,6 +42,22 @@ public class GoodsController {
     public Result add(@RequestBody GoodsAddDto goodsDto, HttpServletRequest request) {
         // 这个@RequestBody有两个包，别导错了！！
         Result result = goodsService.add(goodsDto, request);
+        return result;
+    }
+
+    @ApiOperation("修改二手商品")
+    @RequiresRoles("user")
+    @PostMapping("/edit")
+    public Result edit(@RequestBody GoodsEditDto goodsEditDto, HttpServletRequest request) {
+        Result result = goodsService.editGoods(goodsEditDto, request);
+        return result;
+    }
+
+    @ApiOperation("下架自己的二手商品")
+    @RequiresRoles("user")
+    @DeleteMapping("/{goodsId}")
+    public Result deleteMyGoods(@PathVariable("goodsId") Integer goodsId, HttpServletRequest request) {
+        Result result = goodsService.deleteMyGoods(goodsId, request);
         return result;
     }
 

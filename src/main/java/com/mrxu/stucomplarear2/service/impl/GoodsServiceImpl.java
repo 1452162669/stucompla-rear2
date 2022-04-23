@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.GoodsAddDto;
+import com.mrxu.stucomplarear2.dto.GoodsEditDto;
 import com.mrxu.stucomplarear2.dto.GoodsFindDto;
 import com.mrxu.stucomplarear2.entity.Goods;
 import com.mrxu.stucomplarear2.mapper.GoodsMapper;
@@ -57,7 +58,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     public Result findGoods(GoodsFindDto goodsFindDto) {
         int pageNum = goodsFindDto.getPageNum() == null ? 1 : goodsFindDto.getPageNum();
-        int pageSize = goodsFindDto.getPageSize() == null ?20 : goodsFindDto.getPageSize();
+        int pageSize = goodsFindDto.getPageSize() == null ? 20 : goodsFindDto.getPageSize();
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
         if (goodsFindDto.getGoodsId() != null) {
             queryWrapper.eq("goods_id", goodsFindDto.getGoodsId());
@@ -103,9 +104,57 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public Goods updateViewNum(Goods goods) {
-        goods.setViewNum(goods.getViewNum()+1);
+        goods.setViewNum(goods.getViewNum() + 1);
         goodsMapper.updateById(goods);
         return goods;
+    }
+
+    @Override
+    public Result editGoods(GoodsEditDto goodsEditDto, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+
+            if (goodsEditDto.getGoodsId() == null) {
+                return Result.fail("商品ID为空");
+            }
+            Goods goods = goodsMapper.selectById(goodsEditDto.getGoodsId());
+            if (goods.getUserId()!=Integer.valueOf(userId)) {
+                return Result.fail("不可编辑别人的商品");
+            }
+            goods.setGoodsCategoryId(goodsEditDto.getGoodsCategoryId());
+            goods.setGoodsCount(goodsEditDto.getGoodsCount());
+            goods.setGoodsDetail(goodsEditDto.getGoodsDetail());
+            goods.setGoodsImages(goodsEditDto.getGoodsImages());
+            goods.setGoodsPrice(goodsEditDto.getGoodsPrice());
+            goods.setGoodsName(goodsEditDto.getGoodsName());
+            goodsMapper.updateById(goods);
+            return Result.succ("修改成功");
+        }catch (Exception e){
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result deleteMyGoods(Integer goodsId, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+
+            if (goodsId == null) {
+                return Result.fail("商品ID为空");
+            }
+            Goods goods = goodsMapper.selectById(goodsId);
+            if (goods.getUserId()!=Integer.valueOf(userId)) {
+                return Result.fail("不可删除别人的商品");
+            }
+            goodsMapper.deleteById(goodsId);
+            return Result.succ("删除成功");
+        }catch (Exception e){
+            return Result.fail(e.toString());
+        }
     }
 
 }

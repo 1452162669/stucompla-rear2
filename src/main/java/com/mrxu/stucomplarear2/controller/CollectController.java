@@ -1,6 +1,7 @@
 package com.mrxu.stucomplarear2.controller;
 
 
+import com.mrxu.stucomplarear2.dto.CollectFindDto;
 import com.mrxu.stucomplarear2.mapper.PostMapper;
 import com.mrxu.stucomplarear2.service.CollectService;
 import com.mrxu.stucomplarear2.utils.response.Result;
@@ -32,7 +33,7 @@ public class CollectController {
     @RequiresRoles("user")
     @GetMapping("/check/{postId}")
     public Result check(@PathVariable("postId") Integer postId, HttpServletRequest request) {
-        
+
         Result result = collectService.checkCollect(postId, request);
         return result;
     }
@@ -50,6 +51,14 @@ public class CollectController {
     @DeleteMapping("/delete/{postId}")
     public Result delete(@PathVariable("postId") Integer postId, HttpServletRequest request) {
         Result result = collectService.deleteCollect(postId, request);
+        return result;
+    }
+
+    @ApiOperation("获取收藏列表")
+//    @RequiresRoles("user")
+    @GetMapping("/list")
+    public Result listCollect(CollectFindDto collectFindDto){
+        Result result = collectService.listCollect(collectFindDto);
         return result;
     }
 
