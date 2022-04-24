@@ -1,6 +1,7 @@
 package com.mrxu.stucomplarear2.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.mrxu.stucomplarear2.dto.PostEditDto;
 import com.mrxu.stucomplarear2.dto.PostFindDto;
 import com.mrxu.stucomplarear2.dto.PostPublishDto;
 import com.mrxu.stucomplarear2.entity.Post;
@@ -27,4 +28,7 @@ public interface PostService extends IService<Post> {
 
     Map<String, Object> findPostList(PostFindDto postFindDto);
 
+    Result editPost(HttpServletRequest request, PostEditDto postEditDto);
+
+    Result deleteMyPost(Integer postId, HttpServletRequest request);
 }

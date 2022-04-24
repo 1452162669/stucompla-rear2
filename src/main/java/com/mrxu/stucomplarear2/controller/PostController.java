@@ -1,6 +1,7 @@
 package com.mrxu.stucomplarear2.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.mrxu.stucomplarear2.dto.PostEditDto;
 import com.mrxu.stucomplarear2.dto.PostFindDto;
 import com.mrxu.stucomplarear2.dto.PostPublishDto;
 import com.mrxu.stucomplarear2.dto.PostVo;
@@ -52,6 +53,27 @@ public class PostController {
         }
         postService.publishPost(request, postDto);
         return Result.succ(postDto);
+    }
+
+    @ApiOperation("修改帖子")
+    @RequiresRoles("user")
+    @PostMapping("/edit")
+    public Result edit(HttpServletRequest request, @RequestBody PostEditDto postEditDto) {
+        //System.out.println(postDto);
+        QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("category_id", postEditDto.getCategoryId());
+        if (categoryMapper.selectOne(queryWrapper) == null || postEditDto.getTitle().isEmpty() || postEditDto.getDetail().isEmpty()) {
+            return Result.fail("种类参数错误");
+        }
+        Result result = postService.editPost(request,postEditDto);
+        return result;
+    }
+    @ApiOperation("删除帖子")
+    @RequiresRoles("user")
+    @DeleteMapping("/{postId}")
+    public Result deleteMyPost(@PathVariable("postId") Integer postId, HttpServletRequest request) {
+        Result result = postService.deleteMyPost(postId,request);
+        return result;
     }
 
     @ApiOperation("帖子详情")

@@ -4,15 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mrxu.stucomplarear2.dto.PostEditDto;
 import com.mrxu.stucomplarear2.dto.PostFindDto;
 import com.mrxu.stucomplarear2.dto.PostPublishDto;
 import com.mrxu.stucomplarear2.dto.PostVo;
-import com.mrxu.stucomplarear2.entity.Category;
-import com.mrxu.stucomplarear2.entity.Post;
-import com.mrxu.stucomplarear2.entity.User;
-import com.mrxu.stucomplarear2.mapper.CategoryMapper;
-import com.mrxu.stucomplarear2.mapper.PostMapper;
-import com.mrxu.stucomplarear2.mapper.UserMapper;
+import com.mrxu.stucomplarear2.entity.*;
+import com.mrxu.stucomplarear2.mapper.*;
 import com.mrxu.stucomplarear2.service.PostService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
@@ -44,6 +41,10 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
     private UserMapper userMapper;
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private CollectMapper  collectMapper;
+    @Autowired
+    private CommentMapper commentMapper;
 
     @Override
     public Result publishPost(HttpServletRequest request, PostPublishDto postDto) {
@@ -150,5 +151,66 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         return map;
     }
 
+    @Override
+    public Result editPost(HttpServletRequest request, PostEditDto postEditDto) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+
+            if (postEditDto.getPostId() == null) {
+                return Result.fail("帖子ID为空");
+            }
+            Post post = postMapper.selectById(postEditDto.getPostId());
+            if (post.getUserId() != Integer.valueOf(userId)) {
+                return Result.fail("不可编辑别人的帖子");
+            }
+
+            post.setTitle(postEditDto.getTitle());
+            post.setDetail(postEditDto.getDetail());
+            post.setImages(postEditDto.getImages());
+            post.setCategoryId(postEditDto.getCategoryId());
+
+            postMapper.updateById(post);
+            return Result.succ("修改成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result deleteMyPost(Integer postId, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+
+            if (postId == null) {
+                return Result.fail("帖子ID为空");
+            }
+            Post post = postMapper.selectById(postId);
+            if (post.getUserId() != Integer.valueOf(userId)) {
+                return Result.fail("不可删除别人的帖子");
+            }
+
+            //删除对应收藏列表
+            QueryWrapper<Collect> collectQueryWrapper = new QueryWrapper<>();
+            collectQueryWrapper.eq("post_id",postId);
+            collectMapper.delete(collectQueryWrapper);
+
+            //删除评论列表
+            QueryWrapper<Comment> commentQueryWrapper = new QueryWrapper<>();
+            commentQueryWrapper.eq("post_id",postId);
+            commentMapper.delete(commentQueryWrapper);
+
+            //删除帖子
+            postMapper.deleteById(postId);
+            //分类里对应的帖子数要减一
+            //加一个消息通知，如‘你收藏的帖子已被xxx删除’
+            return Result.succ("删除成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
 
 }
