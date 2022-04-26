@@ -83,7 +83,9 @@ public class PostController {
             QueryWrapper<Post> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("post_id", postId);
             Post post = postService.getOne(queryWrapper);
-
+            if (post==null) {
+                return Result.fail("帖子不存在");
+            }
             post = postService.updateViewNum(post);
             PostVo postVo = new PostVo();
             BeanUtils.copyProperties(post, postVo);

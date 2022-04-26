@@ -1,23 +1,29 @@
 package com.mrxu.stucomplarear2.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mrxu.stucomplarear2.dto.MarketOrderFindDto;
 import com.mrxu.stucomplarear2.dto.MarketOrderVo;
 import com.mrxu.stucomplarear2.dto.OrderAddDto;
-import com.mrxu.stucomplarear2.entity.Goods;
-import com.mrxu.stucomplarear2.entity.MarketOrder;
-import com.mrxu.stucomplarear2.entity.User;
+import com.mrxu.stucomplarear2.entity.*;
 import com.mrxu.stucomplarear2.mapper.GoodsMapper;
 import com.mrxu.stucomplarear2.mapper.MarketOrderMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.MarketOrderService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.concurrent.RecursiveTask;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -111,4 +117,202 @@ public class MarketOrderServiceImpl extends ServiceImpl<MarketOrderMapper, Marke
         }
         return Result.succ("支付成功");
     }
+
+    @Override
+    public Result getMyOrder(MarketOrderFindDto marketOrderFindDto, HttpServletRequest request) {
+        int pageNum = marketOrderFindDto.getPageNum() == null ? 1 : marketOrderFindDto.getPageNum();
+        int pageSize = marketOrderFindDto.getPageSize() == null ? 4 : marketOrderFindDto.getPageSize();
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+
+            QueryWrapper<MarketOrder> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("buyer_id", userId);
+            queryWrapper.orderByDesc("create_time"); //默认创建时间降序
+            //当前页 页面大小
+            IPage<MarketOrder> page = new Page<>(pageNum, pageSize);
+
+            IPage<MarketOrder> orderIPage = marketOrderMapper.selectPage(page, queryWrapper);
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("current", orderIPage.getCurrent());//当前页
+            map.put("total", orderIPage.getTotal());//总记录数
+            map.put("pages", orderIPage.getPages());//总页数
+            map.put("pageSize", orderIPage.getSize());//页面大小
+
+            List<MarketOrderVo> marketOrderVoList = new ArrayList<>();
+
+            for (MarketOrder order : orderIPage.getRecords()) {
+                MarketOrderVo marketOrderVo = new MarketOrderVo();
+                BeanUtils.copyProperties(order, marketOrderVo);
+                //查对应的用户信息
+                User buyer = userMapper.selectById(order.getBuyerId());
+                User seller = userMapper.selectById(order.getSellerId());
+                marketOrderVo.setBuyer(buyer);
+                marketOrderVo.setSeller(seller);
+                //查询对应商品信息
+                Goods goods = goodsMapper.selectById(order.getGoodsId());
+                marketOrderVo.setGoods(goods);
+                marketOrderVoList.add(marketOrderVo);
+            }
+            map.put("orderList", marketOrderVoList);//数据
+            return Result.succ(map);
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result deleteOrder(Integer orderId, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+
+            if (orderId == null) {
+                return Result.fail("订单ID为空");
+            }
+            MarketOrder marketOrder = marketOrderMapper.selectById(orderId);
+            if (marketOrder == null) {
+                return Result.fail("订单不存在");
+            }
+            if (marketOrder.getBuyerId()!=Integer.valueOf(userId)) {
+                return Result.fail("无权删除别人的订单");
+            }
+            marketOrderMapper.deleteById(orderId);
+            //后台管理成交量应该也要改
+            //加一个消息通知，如‘你的xx订单已被xxx删除’
+            return Result.succ("删除成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result sendGoods(Integer orderId, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+            if (orderId == null) {
+                return Result.fail("参数错误");
+            }
+            MarketOrder marketOrder = marketOrderMapper.selectById(orderId);
+            if (marketOrder == null) {
+                return Result.fail("订单不存在");
+            }
+            if (marketOrder.getSellerId()!=Integer.valueOf(userId)) {
+                return Result.fail("无权操作");
+            }
+
+            //更改订单状态为“已发货”
+            marketOrder.setOrderStatus(2);
+            marketOrderMapper.updateById(marketOrder);
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+        return Result.succ("发货成功");
+    }
+
+    @Override
+    public Result receipt(Integer orderId, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+            if (orderId == null) {
+                return Result.fail("参数错误");
+            }
+            MarketOrder marketOrder = marketOrderMapper.selectById(orderId);
+            if (marketOrder == null) {
+                return Result.fail("订单不存在");
+            }
+            if (marketOrder.getBuyerId()!=Integer.valueOf(userId)) {
+                return Result.fail("这不是你的订单");
+            }
+
+            //更改订单状态为“已签收”
+            marketOrder.setOrderStatus(3);
+            marketOrderMapper.updateById(marketOrder);
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+        return Result.succ("签收成功");
+    }
+
+    @Override
+    public Result getMySalesOrders(MarketOrderFindDto marketOrderFindDto, HttpServletRequest request) {
+        int pageNum = marketOrderFindDto.getPageNum() == null ? 1 : marketOrderFindDto.getPageNum();
+        int pageSize = marketOrderFindDto.getPageSize() == null ? 4 : marketOrderFindDto.getPageSize();
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+
+            QueryWrapper<MarketOrder> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("seller_id", userId);
+
+            if (marketOrderFindDto.getOrderId() != null) {
+                queryWrapper.eq("order_id", marketOrderFindDto.getOrderId());
+            }
+            if (marketOrderFindDto.getBuyerId() != null) {
+                queryWrapper.eq("buyer_id", marketOrderFindDto.getBuyerId());
+            }
+            if (marketOrderFindDto.getGoodsId() != null) {
+                queryWrapper.eq("goods_id", marketOrderFindDto.getGoodsId() );
+            }
+            if (marketOrderFindDto.getOrderStatus() != null) {
+                queryWrapper.eq("order_status", marketOrderFindDto.getOrderStatus());
+            }
+            String sort = marketOrderFindDto.getSort();
+            if ("+order_id".equals(sort)) {
+                queryWrapper.orderByAsc("order_id");//根据post_id升序排列
+            } else if ("-order_id".equals(sort)) {
+                queryWrapper.orderByDesc("order_id");
+            } else if ("+update_time".equals(sort)) {
+                queryWrapper.orderByAsc("update_time");
+            } else if ("-update_time".equals(sort)) {
+                queryWrapper.orderByDesc("update_time");
+            } else if ("+total_price".equals(sort)) {
+                queryWrapper.orderByAsc("total_price");
+            } else if ("-total_price".equals(sort)) {
+                queryWrapper.orderByDesc("total_price");
+            } else {
+                queryWrapper.orderByDesc("create_time"); //默认发布时间降序
+            }
+
+            //当前页 页面大小
+            IPage<MarketOrder> page = new Page<>(pageNum, pageSize);
+
+            IPage<MarketOrder> orderIPage = marketOrderMapper.selectPage(page, queryWrapper);
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("current", orderIPage.getCurrent());//当前页
+            map.put("total", orderIPage.getTotal());//总记录数
+            map.put("pages", orderIPage.getPages());//总页数
+            map.put("pageSize", orderIPage.getSize());//页面大小
+
+            List<MarketOrderVo> marketOrderVoList = new ArrayList<>();
+
+            for (MarketOrder order : orderIPage.getRecords()) {
+                MarketOrderVo marketOrderVo = new MarketOrderVo();
+                BeanUtils.copyProperties(order, marketOrderVo);
+                //查对应的用户信息
+                User buyer = userMapper.selectById(order.getBuyerId());
+                User seller = userMapper.selectById(order.getSellerId());
+                marketOrderVo.setBuyer(buyer);
+                marketOrderVo.setSeller(seller);
+                //查询对应商品信息
+                Goods goods = goodsMapper.selectById(order.getGoodsId());
+                marketOrderVo.setGoods(goods);
+                marketOrderVoList.add(marketOrderVo);
+            }
+            map.put("orderList", marketOrderVoList);//数据
+            return Result.succ(map);
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
 }

@@ -22,7 +22,7 @@ import java.io.IOException;
 public class GlobalExceptionHandle {
 
     // 捕捉shiro的异常
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(ShiroException.class)
     public Result handle401(ShiroException e) {
         return Result.fail(401, e.getMessage(), null);
@@ -37,7 +37,7 @@ public class GlobalExceptionHandle {
     }
 
     // 捕捉没有相应的权限或者角色的异常
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(UnauthorizedException.class)
     public Result handle401(UnauthorizedException e) {
         System.out.println(e.getMessage());
@@ -48,7 +48,7 @@ public class GlobalExceptionHandle {
     /**
      * @Validated 校验错误异常处理
      */
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public Result handler(MethodArgumentNotValidException e) throws IOException {
 //        log.error("运行时异常:-------------->",e);
@@ -61,7 +61,7 @@ public class GlobalExceptionHandle {
     /**
      * 处理Assert的异常
      */
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = IllegalArgumentException.class)
     public Result handler(IllegalArgumentException e) throws IOException {
 //        log.error("Assert异常:-------------->{}",e.getMessage());
@@ -70,14 +70,14 @@ public class GlobalExceptionHandle {
 
 
     //运行时错误处理
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = RuntimeException.class)
     public Result handle(RuntimeException e) {
         return Result.fail(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
     }
 
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = TokenExpiredException.class)
     public Result handler(TokenExpiredException e) throws IOException {
         return Result.fail(HttpStatus.BAD_REQUEST.value(), "token已经过期，请重新登录", null);
