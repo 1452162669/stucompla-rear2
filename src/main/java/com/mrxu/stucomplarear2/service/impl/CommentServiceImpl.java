@@ -5,19 +5,25 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.CommentDto;
+import com.mrxu.stucomplarear2.dto.CommentVo;
 import com.mrxu.stucomplarear2.entity.Comment;
 import com.mrxu.stucomplarear2.entity.Post;
+import com.mrxu.stucomplarear2.entity.User;
 import com.mrxu.stucomplarear2.mapper.CommentMapper;
 import com.mrxu.stucomplarear2.mapper.PostMapper;
+import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.CommentService;
 import com.mrxu.stucomplarear2.utils.Constants;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,6 +41,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private PostMapper postMapper;
     @Autowired
     private CommentMapper commentMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public Result createComment(HttpServletRequest request, CommentDto commentDto) {
@@ -53,7 +61,9 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             comment.setPostId(commentDto.getPostId());
             comment.setParentId(commentDto.getParentId());
             comment.setText(commentDto.getText());
-            comment.setImages(commentDto.getImages());
+            if (commentDto.getImages() != null) {
+                comment.setImages(commentDto.getImages());
+            }
             String accessToken = request.getHeader("Authorization");
             //获取token里面的用户ID
             String userId = JWTUtil.getUserId(accessToken);
@@ -97,7 +107,26 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             map.put("total", commentIPage.getTotal());//总记录数
             map.put("pages", commentIPage.getPages());//总页数
             map.put("pageSize", commentIPage.getSize());//页面大小
-            map.put("comments", commentIPage.getRecords());//数据
+            List<CommentVo> commentVoList = new ArrayList<>();
+            for (Comment comment : commentIPage.getRecords()) {
+                CommentVo commentVo = new CommentVo();
+                BeanUtils.copyProperties(comment, commentVo);
+                //查对应的发布人信息
+                User user = userMapper.selectById(comment.getUserId());
+                commentVo.setUser(user);
+
+                if(comment.getParentId()!=null){
+                    //查对应的父评论信息
+                    Comment parentComment = commentMapper.selectById(comment.getParentId());
+                    CommentVo parentCommentVo = new CommentVo();
+                    BeanUtils.copyProperties(parentComment, parentCommentVo);
+                    User parentCommentUser = userMapper.selectById(parentComment.getUserId());
+                    parentCommentVo.setUser(parentCommentUser);
+                    commentVo.setParentCommentVo(parentCommentVo);
+                }
+                commentVoList.add(commentVo);
+            }
+            map.put("comments", commentVoList);//数据
             return Result.succ(map);
         } catch (Exception e) {
             e.printStackTrace();
