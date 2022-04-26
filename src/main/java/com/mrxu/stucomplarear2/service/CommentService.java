@@ -19,5 +19,7 @@ public interface CommentService extends IService<Comment> {
 
     Result createComment(HttpServletRequest request, CommentDto commentDto);
 
-    Result listCommentFromPost(Integer postId,int page,int size);
+    Result listCommentFromPost(Integer postId,Integer page,Integer size);
+
+    Result getMyList(Integer page, Integer size,HttpServletRequest request);
 }

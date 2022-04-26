@@ -1,7 +1,6 @@
 package com.mrxu.stucomplarear2.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.mrxu.stucomplarear2.entity.Comment;
 import com.mrxu.stucomplarear2.entity.User;
 import lombok.Data;
 
@@ -29,6 +28,7 @@ public class CommentVo {
      * 帖子ID
      */
     private Integer postId;
+    private PostVo postVo;
 
     /**
      * 父评论ID

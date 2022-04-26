@@ -6,9 +6,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.CommentDto;
 import com.mrxu.stucomplarear2.dto.CommentVo;
+import com.mrxu.stucomplarear2.dto.PostVo;
+import com.mrxu.stucomplarear2.entity.Category;
 import com.mrxu.stucomplarear2.entity.Comment;
 import com.mrxu.stucomplarear2.entity.Post;
 import com.mrxu.stucomplarear2.entity.User;
+import com.mrxu.stucomplarear2.mapper.CategoryMapper;
 import com.mrxu.stucomplarear2.mapper.CommentMapper;
 import com.mrxu.stucomplarear2.mapper.PostMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
@@ -43,6 +46,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private CommentMapper commentMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private CategoryMapper categoryMapper;
 
     @Override
     public Result createComment(HttpServletRequest request, CommentDto commentDto) {
@@ -82,23 +87,19 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     }
 
     @Override
-    public Result listCommentFromPost(Integer postId, int page, int size) {
+    public Result listCommentFromPost(Integer postId, Integer page, Integer size) {
         try {
             if (postMapper.selectById(postId) == null) {
                 return Result.fail("帖子不存在");
             }
             //处理page和size 参数检查
-            if (page < Constants.Page.DEFAULT_PAGE) {
-                page = Constants.Page.DEFAULT_PAGE;
-            }
-            if (size < Constants.Page.MIN_SIZE) {
-                size = Constants.Page.MIN_SIZE;
-            }
+            int pageNum = page == null ? 1 : page;
+            int pageSize = size == null ? 4 : size;
             //创建分页条件
             QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("post_id", postId);
             //当前页 页面大小
-            IPage<Comment> iPage = new Page<Comment>(page, size);
+            IPage<Comment> iPage = new Page<Comment>(pageNum, pageSize);
             queryWrapper.orderByDesc("create_time"); //根据上传时间降序排列
 
             IPage<Comment> commentIPage = commentMapper.selectPage(iPage, queryWrapper);
@@ -114,6 +115,68 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 //查对应的发布人信息
                 User user = userMapper.selectById(comment.getUserId());
                 commentVo.setUser(user);
+
+                if(comment.getParentId()!=null){
+                    //查对应的父评论信息
+                    Comment parentComment = commentMapper.selectById(comment.getParentId());
+                    CommentVo parentCommentVo = new CommentVo();
+                    BeanUtils.copyProperties(parentComment, parentCommentVo);
+                    User parentCommentUser = userMapper.selectById(parentComment.getUserId());
+                    parentCommentVo.setUser(parentCommentUser);
+                    commentVo.setParentCommentVo(parentCommentVo);
+                }
+                commentVoList.add(commentVo);
+            }
+            map.put("comments", commentVoList);//数据
+            return Result.succ(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.fail("异常");
+        }
+    }
+
+    @Override
+    public Result getMyList(Integer page, Integer size,HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+            if (userMapper.selectById(userId) == null) {
+                return Result.fail("用户不存在");
+            }
+
+            int pageNum = page == null ? 1 : page;
+            int pageSize = size == null ? 4 : size;
+
+
+            //创建分页条件
+            QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("user_id", userId);
+            //当前页 页面大小
+            IPage<Comment> iPage = new Page<Comment>(pageNum, pageSize);
+            queryWrapper.orderByDesc("create_time"); //根据评论时间降序排列
+
+            IPage<Comment> commentIPage = commentMapper.selectPage(iPage, queryWrapper);
+            Map<String, Object> map = new HashMap<>();
+            map.put("current", commentIPage.getCurrent());//当前页
+            map.put("total", commentIPage.getTotal());//总记录数
+            map.put("pages", commentIPage.getPages());//总页数
+            map.put("pageSize", commentIPage.getSize());//页面大小
+            List<CommentVo> commentVoList = new ArrayList<>();
+            for (Comment comment : commentIPage.getRecords()) {
+                CommentVo commentVo = new CommentVo();
+                BeanUtils.copyProperties(comment, commentVo);
+                //查对应的发布人信息
+                User user = userMapper.selectById(comment.getUserId());
+                commentVo.setUser(user);
+                //查帖子信息
+                Post post = postMapper.selectById(comment.getPostId());
+
+                Category category =categoryMapper.selectById(post.getCategoryId());
+                PostVo postVo = new PostVo();
+                BeanUtils.copyProperties(post,postVo);
+                postVo.setCategory(category);
+                commentVo.setPostVo(postVo);
 
                 if(comment.getParentId()!=null){
                     //查对应的父评论信息

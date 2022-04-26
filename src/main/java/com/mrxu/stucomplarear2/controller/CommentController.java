@@ -37,4 +37,11 @@ public class CommentController {
 
         return commentService.listCommentFromPost(postId, page, size);
     }
+
+    @ApiOperation("我的评论列表")
+    @GetMapping("/myList/{page}/{size}")
+    public Result getMyList(@PathVariable("page") Integer page, @PathVariable("size") Integer size,HttpServletRequest request) {
+
+        return commentService.getMyList(page, size,request);
+    }
 }
