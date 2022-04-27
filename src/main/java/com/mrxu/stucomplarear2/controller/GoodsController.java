@@ -1,6 +1,5 @@
 package com.mrxu.stucomplarear2.controller;
 
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.mrxu.stucomplarear2.dto.*;
 import com.mrxu.stucomplarear2.entity.*;
@@ -9,6 +8,7 @@ import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.GoodsService;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import io.swagger.annotations.ApiOperation;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,13 +53,31 @@ public class GoodsController {
         return result;
     }
 
-    @ApiOperation("下架自己的二手商品")
+    @ApiOperation("删除自己的二手商品")
     @RequiresRoles("user")
     @DeleteMapping("/{goodsId}")
     public Result deleteMyGoods(@PathVariable("goodsId") Integer goodsId, HttpServletRequest request) {
         Result result = goodsService.deleteMyGoods(goodsId, request);
         return result;
     }
+
+    @ApiOperation("管理员下架商品")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @PostMapping("/unShelve/{goodsId}")
+    public Result unShelveGoods(@PathVariable("goodsId") Integer goodsId) {
+        Result result = goodsService.unShelveGoods(goodsId);
+        return result;
+    }
+
+    @ApiOperation("管理员删除商品")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @PostMapping("/deleteGoods/{goodsId}")
+    public Result deleteGoods(@PathVariable("goodsId") Integer goodsId) {
+        Result result = goodsService.deleteGoods(goodsId);
+        return result;
+    }
+
+
 
     @ApiOperation("获取二手商品列表")
     @GetMapping("/getList")

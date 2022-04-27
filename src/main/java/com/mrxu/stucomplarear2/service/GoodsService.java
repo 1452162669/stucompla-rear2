@@ -28,4 +28,8 @@ public interface GoodsService extends IService<Goods> {
     Result editGoods(GoodsEditDto goodsEditDto, HttpServletRequest request);
 
     Result deleteMyGoods(Integer goodsId, HttpServletRequest request);
+
+    Result unShelveGoods(Integer goodsId);
+
+    Result deleteGoods(Integer goodsId);
 }

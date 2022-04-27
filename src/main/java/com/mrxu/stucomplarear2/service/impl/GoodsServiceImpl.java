@@ -4,11 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.mrxu.stucomplarear2.dto.GoodsAddDto;
-import com.mrxu.stucomplarear2.dto.GoodsEditDto;
-import com.mrxu.stucomplarear2.dto.GoodsFindDto;
-import com.mrxu.stucomplarear2.entity.Goods;
+import com.mrxu.stucomplarear2.dto.*;
+import com.mrxu.stucomplarear2.entity.*;
+import com.mrxu.stucomplarear2.mapper.GoodsCategoryMapper;
 import com.mrxu.stucomplarear2.mapper.GoodsMapper;
+import com.mrxu.stucomplarear2.mapper.MarketOrderMapper;
+import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.GoodsService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
@@ -17,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,6 +36,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Autowired
     private GoodsMapper goodsMapper;
+    @Autowired
+    private MarketOrderMapper marketOrderMapper;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private GoodsCategoryMapper goodsCategoryMapper;
 
     @Override
     public Result add(GoodsAddDto goodsDto, HttpServletRequest request) {
@@ -97,7 +106,23 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         map.put("pages", goodsIPage.getPages());//总页数
 
         map.put("pageSize", goodsIPage.getSize());//页面大小
-        map.put("goodsList", goodsIPage.getRecords());//数据
+
+        List<GoodsVo> goodsVoList = new ArrayList<>();
+        for (Goods goods : goodsIPage.getRecords()) {
+            GoodsVo goodsVo = new GoodsVo();
+            BeanUtils.copyProperties(goods, goodsVo);
+            //查对应的发布人信息
+            User user = userMapper.selectById(goods.getUserId());
+            goodsVo.setUser(user);
+            //查对应的帖子类型信息
+            GoodsCategory goodsCategory = goodsCategoryMapper.selectById(goods.getGoodsCategoryId());
+            goodsVo.setGoodsCategory(goodsCategory);
+//            System.out.println(postVo);
+            goodsVoList.add(goodsVo);
+//            System.out.println(postVoList);
+        }
+
+        map.put("goodsList", goodsVoList);//数据
 
         return Result.succ(map);
     }
@@ -120,7 +145,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                 return Result.fail("商品ID为空");
             }
             Goods goods = goodsMapper.selectById(goodsEditDto.getGoodsId());
-            if (goods.getUserId()!=Integer.valueOf(userId)) {
+            if (goods.getUserId() != Integer.valueOf(userId)) {
                 return Result.fail("不可编辑别人的商品");
             }
             goods.setGoodsCategoryId(goodsEditDto.getGoodsCategoryId());
@@ -131,7 +156,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             goods.setGoodsName(goodsEditDto.getGoodsName());
             goodsMapper.updateById(goods);
             return Result.succ("修改成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             return Result.fail(e.toString());
         }
     }
@@ -147,14 +172,68 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                 return Result.fail("商品ID为空");
             }
             Goods goods = goodsMapper.selectById(goodsId);
-            if (goods.getUserId()!=Integer.valueOf(userId)) {
+            if (goods == null) {
+                return Result.fail("商品不存在");
+            }
+            if (goods.getUserId() != Integer.valueOf(userId)) {
                 return Result.fail("不可删除别人的商品");
             }
             goodsMapper.deleteById(goodsId);
             return Result.succ("删除成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             return Result.fail(e.toString());
         }
+    }
+
+    @Override
+    public Result unShelveGoods(Integer goodsId) {
+        try {
+            if (goodsId == null) {
+                return Result.fail("商品ID为空");
+            }
+            Goods goods = goodsMapper.selectById(goodsId);
+            if (goods == null) {
+                return Result.fail("商品不存在");
+            }
+            goods.setGoodsStatus(false);
+            goodsMapper.updateById(goods);
+            return Result.succ("下架成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+
+    }
+
+    @Override
+    public Result deleteGoods(Integer goodsId) {
+        try {
+            if (goodsId == null) {
+                return Result.fail("商品ID为空");
+            }
+            Goods goods = goodsMapper.selectById(goodsId);
+            if (goods == null) {
+                return Result.fail("商品不存在");
+            }
+            //该商品所有订单都完成后才可以删除，否则只能下架
+
+
+            goodsMapper.deleteById(goodsId);
+            return Result.succ("删除成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+
+    private boolean isHaveOrder(Integer goodsId) {
+        QueryWrapper<MarketOrder> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("goods_id", goodsId);
+        List<MarketOrder> marketOrders = marketOrderMapper.selectList(queryWrapper);
+
+        MarketOrder marketOrder = marketOrderMapper.selectOne(queryWrapper);
+
+
+        return false;
     }
 
 }
