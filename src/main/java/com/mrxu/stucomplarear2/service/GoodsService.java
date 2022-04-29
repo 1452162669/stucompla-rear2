@@ -32,4 +32,8 @@ public interface GoodsService extends IService<Goods> {
     Result unShelveGoods(Integer goodsId);
 
     Result deleteGoods(Integer goodsId);
+
+    Result putMyGoods(Integer goodsId, HttpServletRequest request);
+
+    Result unShelveMyGoods(Integer goodsId, HttpServletRequest request);
 }

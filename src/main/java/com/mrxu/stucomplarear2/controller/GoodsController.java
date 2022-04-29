@@ -6,6 +6,7 @@ import com.mrxu.stucomplarear2.entity.*;
 import com.mrxu.stucomplarear2.mapper.GoodsCategoryMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.GoodsService;
+import com.mrxu.stucomplarear2.service.LetterService;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.Logical;
@@ -35,6 +36,8 @@ public class GoodsController {
     private UserMapper userMapper;
     @Autowired
     private GoodsCategoryMapper goodsCategoryMapper;
+    @Autowired
+    private LetterService letterService;
 
     @ApiOperation("发布二手商品")
     @RequiresRoles("user")
@@ -58,6 +61,22 @@ public class GoodsController {
     @DeleteMapping("/{goodsId}")
     public Result deleteMyGoods(@PathVariable("goodsId") Integer goodsId, HttpServletRequest request) {
         Result result = goodsService.deleteMyGoods(goodsId, request);
+        return result;
+    }
+
+    @ApiOperation("重新上架自己的二手商品")
+    @RequiresRoles("user")
+    @PostMapping("/putMyGoods/{goodsId}")
+    public Result putMyGoods(@PathVariable("goodsId") Integer goodsId, HttpServletRequest request) {
+        Result result = goodsService.putMyGoods(goodsId, request);
+        return result;
+    }
+
+    @ApiOperation("下架自己的商品")
+    @RequiresRoles("user")
+    @PostMapping("/unShelveMyGoods/{goodsId}")
+    public Result unShelveMyGoods(@PathVariable("goodsId") Integer goodsId, HttpServletRequest request) {
+        Result result = goodsService.unShelveMyGoods(goodsId, request);
         return result;
     }
 

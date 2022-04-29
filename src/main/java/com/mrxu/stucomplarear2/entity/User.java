@@ -83,4 +83,9 @@ public class User implements Serializable {
     public boolean getLocked() {
         return locked;
     }
+
+    /**
+     * 头像
+     */
+    private String avatar;
 }

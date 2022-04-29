@@ -78,5 +78,25 @@ public class MarketOrder implements Serializable {
      */
     private Integer orderStatus;
 
+    /**
+     * 二手商品名称
+     */
+    private String goodsName;
+
+    /**
+     * 二手商品图片
+     */
+    private String goodsImages;
+
+    /**
+     * 二手商品定价
+     */
+    private Double goodsPrice;
+
+    /**
+     * 二手商品分类id
+     */
+    private Integer goodsCategoryId;
+
 
 }

@@ -11,6 +11,7 @@ import com.mrxu.stucomplarear2.mapper.GoodsMapper;
 import com.mrxu.stucomplarear2.mapper.MarketOrderMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.GoodsService;
+import com.mrxu.stucomplarear2.service.LetterService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import org.springframework.beans.BeanUtils;
@@ -42,6 +43,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     private UserMapper userMapper;
     @Autowired
     private GoodsCategoryMapper goodsCategoryMapper;
+    @Autowired
+    private LetterService letterService;
 
     @Override
     public Result add(GoodsAddDto goodsDto, HttpServletRequest request) {
@@ -214,9 +217,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             if (goods == null) {
                 return Result.fail("商品不存在");
             }
-            //该商品所有订单都完成后才可以删除，否则只能下架
-
-
             goodsMapper.deleteById(goodsId);
             return Result.succ("删除成功");
         } catch (Exception e) {
@@ -224,16 +224,56 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         }
     }
 
+    @Override
+    public Result putMyGoods(Integer goodsId, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
 
-    private boolean isHaveOrder(Integer goodsId) {
-        QueryWrapper<MarketOrder> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("goods_id", goodsId);
-        List<MarketOrder> marketOrders = marketOrderMapper.selectList(queryWrapper);
+            if (goodsId == null) {
+                return Result.fail("商品ID为空");
+            }
+            Goods goods = goodsMapper.selectById(goodsId);
+            if (goods == null) {
+                return Result.fail("商品不存在");
+            }
+            if (goods.getUserId() != Integer.valueOf(userId)) {
+                return Result.fail("无权操作别人的商品");
+            }
+            goods.setGoodsStatus(true);
+            goodsMapper.updateById(goods);
+            return Result.succ("上架成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
 
-        MarketOrder marketOrder = marketOrderMapper.selectOne(queryWrapper);
-
-
-        return false;
+    @Override
+    public Result unShelveMyGoods(Integer goodsId, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+            if (goodsId == null) {
+                return Result.fail("商品ID为空");
+            }
+            Goods goods = goodsMapper.selectById(goodsId);
+            if (goods == null) {
+                return Result.fail("商品不存在");
+            }
+            if (goods.getUserId() != Integer.valueOf(userId)) {
+                return Result.fail("无权操作别人的商品");
+            }
+            goods.setGoodsStatus(false);
+            goodsMapper.updateById(goods);
+            letterService.addNotice(
+                    new LetterAddDto(Integer.valueOf(userId),
+                            "你的商品 "+goods.getGoodsName()+" 已被自己下架"));
+            return Result.succ("下架成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
     }
 
 }

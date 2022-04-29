@@ -28,6 +28,11 @@ public class MarketOrderVo {
     /**
      * 商品信息
      */
+    private Integer goodsId;
+
+    /**
+     * 商品信息
+     */
     private Goods goods;
 
     /**
@@ -56,4 +61,25 @@ public class MarketOrderVo {
      * 订单状态：0-未付 1-已付 2-已发货 3-已签收 4-已退货 5-订单完成
      */
     private Integer orderStatus;
+
+
+    /**
+     * 二手商品名称
+     */
+    private String goodsName;
+
+    /**
+     * 二手商品图片
+     */
+    private String goodsImages;
+
+    /**
+     * 二手商品定价
+     */
+    private Double goodsPrice;
+
+    /**
+     * 二手商品分类id
+     */
+    private Integer goodsCategoryId;
 }

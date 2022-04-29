@@ -63,9 +63,17 @@ public class MarketOrderServiceImpl extends ServiceImpl<MarketOrderMapper, Marke
                 return Result.fail("库存不足");
             }
             MarketOrder marketOrder = new MarketOrder();
+            //商品信息
             marketOrder.setGoodsId(orderAddDto.getGoodsId());
+            marketOrder.setGoodsName(goods.getGoodsName());
+            marketOrder.setGoodsImages(goods.getGoodsImages());
+            marketOrder.setGoodsCategoryId(goods.getGoodsCategoryId());
+            marketOrder.setGoodsPrice(goods.getGoodsPrice());
+
+            //用户信息
             marketOrder.setBuyerId(Integer.valueOf(userId));
             marketOrder.setSellerId(goods.getUserId());
+
             marketOrder.setBuyCount(orderAddDto.getBuyCount());
             marketOrder.setTotalPrice(goods.getGoodsPrice() * orderAddDto.getBuyCount());
             marketOrder.setOrderStatus(0);
@@ -153,7 +161,9 @@ public class MarketOrderServiceImpl extends ServiceImpl<MarketOrderMapper, Marke
                 marketOrderVo.setSeller(seller);
                 //查询对应商品信息
                 Goods goods = goodsMapper.selectById(order.getGoodsId());
-                marketOrderVo.setGoods(goods);
+                if(goods!=null){
+                    marketOrderVo.setGoods(goods);
+                }
                 marketOrderVoList.add(marketOrderVo);
             }
             map.put("orderList", marketOrderVoList);//数据
@@ -179,6 +189,9 @@ public class MarketOrderServiceImpl extends ServiceImpl<MarketOrderMapper, Marke
             }
             if (marketOrder.getBuyerId()!=Integer.valueOf(userId)) {
                 return Result.fail("无权删除别人的订单");
+            }
+            if (0<marketOrder.getOrderStatus()&&marketOrder.getOrderStatus()<5) {
+                return Result.fail("订单未完成，不可删除");
             }
             marketOrderMapper.deleteById(orderId);
             //后台管理成交量应该也要改
