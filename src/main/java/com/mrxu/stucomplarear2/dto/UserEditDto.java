@@ -1,10 +1,10 @@
 package com.mrxu.stucomplarear2.dto;
 
+
 import lombok.Data;
 
 @Data
-public class UserFindDto {
-
+public class UserEditDto {
     /**
      * 用户ID
      */
@@ -21,20 +21,12 @@ public class UserFindDto {
     private String sex;
 
     /**
-     * 状态 1锁定 0正常
+     * 头像
      */
-    private Integer status;
+    private String avatar;
 
     /**
-     * 当前页
+     * 个性签名
      */
-    private Integer pageNum;
-
-    /**
-     * 页面大小
-     */
-    private Integer pageSize;
-
-    private String sort;
-
+    private String signature;
 }

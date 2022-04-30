@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.RegisterDto;
+import com.mrxu.stucomplarear2.dto.UserEditDto;
 import com.mrxu.stucomplarear2.dto.UserFindDto;
 import com.mrxu.stucomplarear2.entity.User;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.UserService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
+import com.mrxu.stucomplarear2.utils.response.Result;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +112,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public Map<String, Object> findAdminList(UserFindDto userFindDto) {
+    public Map<String, Object> findUserList(UserFindDto userFindDto) {
         int pageNum = userFindDto.getPageNum() == null ? 1 : userFindDto.getPageNum();
         int pageSize = userFindDto.getPageSize() == null ? 4 : userFindDto.getPageSize();
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -119,9 +121,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         if (StringUtils.isNotBlank(userFindDto.getUsername())) {
             queryWrapper.eq("username", userFindDto.getUsername());
-        }
-        if (StringUtils.isNotBlank(userFindDto.getEmail())) {
-            queryWrapper.eq("email", userFindDto.getEmail());
         }
         if (StringUtils.isNotBlank(userFindDto.getSex())) {
             queryWrapper.eq("sex", userFindDto.getSex());
@@ -150,6 +149,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         map.put("pageSize", userIPage.getSize());//页面大小
         map.put("userList", userIPage.getRecords());//数据
         return map;
+    }
+
+    @Override
+    public Result editUserInfo(UserEditDto userEditDto, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+
+            if (userEditDto.getUserId() == null) {
+                return Result.fail("用户ID为空");
+            }
+            User user = userMapper.selectById(userEditDto.getUserId());
+            if (user.getUserId() != Integer.valueOf(userId)) {
+                return Result.fail("不可编辑别人的信息");
+            }
+            user.setUsername(userEditDto.getUsername());
+            user.setSex(userEditDto.getSex());
+            user.setAvatar(userEditDto.getAvatar());
+            user.setSignature(userEditDto.getSignature());
+            userMapper.updateById(user);
+            return Result.succ("修改成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
     }
 
     /**

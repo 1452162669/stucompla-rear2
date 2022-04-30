@@ -2,6 +2,7 @@ package com.mrxu.stucomplarear2.controller;
 
 import com.mrxu.stucomplarear2.dto.LoginDto;
 import com.mrxu.stucomplarear2.dto.RegisterDto;
+import com.mrxu.stucomplarear2.dto.UserEditDto;
 import com.mrxu.stucomplarear2.dto.UserFindDto;
 import com.mrxu.stucomplarear2.entity.User;
 import com.mrxu.stucomplarear2.service.UserService;
@@ -56,17 +57,13 @@ public class UserController {
         }
     }
 
-    /*@ApiOperation("修改信息")
+    @ApiOperation("编辑个人信息")
     @RequiresRoles("user")
-    @PostMapping("/changeInfo")
-    public Result changeInfo(String oldPassword, String inPassword, String secondPassword, ServletRequest request){
-        String regResult = userService.changePassword(request,oldPassword,inPassword,secondPassword);
-        if(regResult.equals("密码修改成功")){
-            return Result.succ(200,regResult,null);
-        }else{
-            return Result.fail(regResult);
-        }
-    }*/
+    @PostMapping("/editUserInfo")
+    public Result editUserInfo(@RequestBody UserEditDto userEditDto, HttpServletRequest request) {
+        Result result = userService.editUserInfo(userEditDto, request);
+        return result;
+    }
 
     @ApiOperation("登录")
     @PostMapping("/login")
@@ -115,11 +112,11 @@ public class UserController {
         return Result.succ("退出成功");
     }
 
-    @ApiOperation("获取用户列表列表")
+    @ApiOperation("获取用户列表")
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @GetMapping("/list")
     public Result listUser(UserFindDto userFindDto) {
-        Map<String, Object> map = userService.findAdminList(userFindDto);
+        Map<String, Object> map = userService.findUserList(userFindDto);
         return Result.succ(map);
     }
 

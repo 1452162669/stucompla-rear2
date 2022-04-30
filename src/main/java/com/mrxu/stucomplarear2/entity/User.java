@@ -40,11 +40,6 @@ public class User implements Serializable {
     private String password;
 
     /**
-     * 邮箱
-     */
-    private String email;
-
-    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)    //用于mybatisplus自动填充时间
@@ -88,4 +83,9 @@ public class User implements Serializable {
      * 头像
      */
     private String avatar;
+
+    /**
+     * 个性签名
+     */
+    private String signature;
 }
