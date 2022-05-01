@@ -57,6 +57,30 @@ public class UserController {
         }
     }
 
+    @ApiOperation("重置用户密码")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @PostMapping("/changePwdByAdmin")
+    public Result changePwdByAdmin(String newPassword, String secondPassword,Integer userId) {
+        Result result = userService.changePwdByAdmin(newPassword, secondPassword,userId);
+       return result;
+    }
+
+    @ApiOperation("锁定用户")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @PostMapping("/lockedUser")
+    public Result lockedUser(Integer userId,String cause) {
+        Result result = userService.lockedUser(userId, cause);
+       return result;
+    }
+
+    @ApiOperation("解锁用户")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @PostMapping("/unLockUser")
+    public Result unLockUser(Integer userId) {
+        Result result = userService.unLockUser(userId);
+       return result;
+    }
+
     @ApiOperation("编辑个人信息")
     @RequiresRoles("user")
     @PostMapping("/editUserInfo")
@@ -77,7 +101,7 @@ public class UserController {
         }
         // 用户被锁定
         if (userFromDb.getLocked()) {
-            return Result.fail("该用户已被锁定,暂时无法登录！");
+            return Result.fail("该用户已被锁定,暂时无法登录！请联系管理员1452162669@qq.com");
 //            throw new LockedAccountException("该用户已被锁定,暂时无法登录！");
         }
         String inPassword = String.valueOf(new SimpleHash("SHA-1",

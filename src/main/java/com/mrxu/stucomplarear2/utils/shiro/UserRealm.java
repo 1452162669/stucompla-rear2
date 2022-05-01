@@ -76,6 +76,9 @@ public class UserRealm extends AuthorizingRealm {
             throw new AuthenticationException("token中无用户Id");
         }
         User user = userService.getUserByUserId(userId);
+        if(user.getLocked()){
+            throw new AuthenticationException("该账户已被锁定，请联系管理员1452162669@qq.com");
+        }
         if (user == null) {
             throw new AuthenticationException("该用户不存在");
         }

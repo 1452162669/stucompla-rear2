@@ -4,19 +4,25 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mrxu.stucomplarear2.dto.LetterAddDto;
 import com.mrxu.stucomplarear2.dto.RegisterDto;
 import com.mrxu.stucomplarear2.dto.UserEditDto;
 import com.mrxu.stucomplarear2.dto.UserFindDto;
 import com.mrxu.stucomplarear2.entity.User;
+import com.mrxu.stucomplarear2.mapper.LetterMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
+import com.mrxu.stucomplarear2.service.LetterService;
 import com.mrxu.stucomplarear2.service.UserService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
+import jdk.internal.org.objectweb.asm.tree.TryCatchBlockNode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -35,6 +41,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private UserMapper userMapper;
+    @Resource
+    private LetterService letterService;
 
     @Override
     public String register(RegisterDto registerDto) {
@@ -173,6 +181,82 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setSignature(userEditDto.getSignature());
             userMapper.updateById(user);
             return Result.succ("修改成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result changePwdByAdmin(String newPassword, String secondPassword,Integer userId) {
+        if (StringUtils.isBlank(newPassword)) {
+            return Result.fail("密码不能为空");
+        }
+        if (!newPassword.equals(secondPassword)) {
+            return Result.fail("重复密码不匹配");
+        }
+        if (newPassword.length() > 16 || newPassword.length() < 6) {
+            return Result.fail("密码长度只能在6~16位");
+        }
+        if(userId==null){
+            return Result.fail("用户ID不能为空");
+        }
+        User user = userMapper.selectById(userId);
+        if (user==null){
+            return Result.fail("用户不存在");
+        }
+
+        newPassword = String.valueOf(new SimpleHash("SHA-1",
+                newPassword,//原始密码
+                user.getUsername(),//用用户名当盐值
+                16));
+        user.setPassword(newPassword);
+        userMapper.updateById(user);
+        letterService.addNotice(
+                new LetterAddDto(Integer.valueOf(userId),
+                        "你的密码已被管理员重置，请尽快修改密码！"));
+        return Result.succ("密码重置成功");
+    }
+
+    @Override
+    public Result lockedUser(Integer userId, String cause) {
+        try {
+            if(userId==null){
+                return Result.fail("用户ID不能为空");
+            }
+            User user = userMapper.selectById(userId);
+            if (user==null){
+                return Result.fail("用户不存在");
+            }
+            if (StringUtils.isBlank(cause)) {
+                return Result.fail("原因不能为空");
+            }
+            user.setLocked(true);
+            userMapper.updateById(user);
+            letterService.addNotice(
+                    new LetterAddDto(Integer.valueOf(userId),
+                            "你的账号已被管理员锁定，原因："+cause));
+            return Result.succ("账户已锁定");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result unLockUser(Integer userId) {
+        try {
+            if(userId==null){
+                return Result.fail("用户ID不能为空");
+            }
+            User user = userMapper.selectById(userId);
+            if (user==null){
+                return Result.fail("用户不存在");
+            }
+            user.setLocked(false);
+            userMapper.updateById(user);
+            letterService.addNotice(
+                    new LetterAddDto(Integer.valueOf(userId),
+                            "你的账号已解锁，今后请规范你的行为，否则会被加重处罚！"));
+            return Result.succ("账户已解锁");
         } catch (Exception e) {
             return Result.fail(e.toString());
         }

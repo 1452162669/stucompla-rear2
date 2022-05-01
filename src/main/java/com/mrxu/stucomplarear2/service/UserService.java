@@ -32,4 +32,10 @@ public interface UserService extends IService<User> {
     Map<String, Object> findUserList(UserFindDto userFindDto);
 
     Result editUserInfo(UserEditDto userEditDto, HttpServletRequest request);
+
+    Result changePwdByAdmin(String newPassword, String secondPassword,Integer userId);
+
+    Result lockedUser(Integer userId, String cause);
+
+    Result unLockUser(Integer userId);
 }
