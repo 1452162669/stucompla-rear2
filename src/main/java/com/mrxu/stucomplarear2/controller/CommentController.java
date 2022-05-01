@@ -31,6 +31,12 @@ public class CommentController {
         return commentService.createComment(request, commentDto);
     }
 
+    @ApiOperation("用户删除评论")
+    @DeleteMapping("/{commentId}")
+    public Result deleteCommentByUser(@PathVariable("commentId") Integer commentId,HttpServletRequest request) {
+        return commentService.deleteCommentByUser(commentId, request);
+    }
+
     @ApiOperation("帖子的评论列表")
     @GetMapping("/list/{postId}/{page}/{size}")
     public Result listComment(@PathVariable("postId") Integer postId, @PathVariable("page") int page, @PathVariable("size") int size) {

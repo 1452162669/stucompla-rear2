@@ -167,7 +167,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
             user.setUsername(userEditDto.getUsername());
             user.setSex(userEditDto.getSex());
-            user.setAvatar(userEditDto.getAvatar());
+            if(StringUtils.isNotBlank(userEditDto.getAvatar())){
+                user.setAvatar(userEditDto.getAvatar());
+            }
             user.setSignature(userEditDto.getSignature());
             userMapper.updateById(user);
             return Result.succ("修改成功");

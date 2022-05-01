@@ -52,7 +52,9 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         post.setTitle(postDto.getTitle());
         post.setCategoryId(postDto.getCategoryId());
         post.setDetail(postDto.getDetail());
-        post.setImages(postDto.getImages());
+        if(StringUtils.isNotBlank(postDto.getImages())){
+            post.setImages(postDto.getImages());
+        }
         String accessToken = request.getHeader("Authorization");
         //获取token里面的用户ID
         String userId = JWTUtil.getUserId(accessToken);
@@ -168,7 +170,9 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 
             post.setTitle(postEditDto.getTitle());
             post.setDetail(postEditDto.getDetail());
-            post.setImages(postEditDto.getImages());
+            if (StringUtils.isNotBlank(postEditDto.getImages())){
+                post.setImages(postEditDto.getImages());
+            }
             post.setCategoryId(postEditDto.getCategoryId());
 
             postMapper.updateById(post);

@@ -11,6 +11,7 @@ import com.mrxu.stucomplarear2.entity.Wall;
 import com.mrxu.stucomplarear2.mapper.WallMapper;
 import com.mrxu.stucomplarear2.service.WallService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +48,7 @@ public class WallServiceImpl extends ServiceImpl<WallMapper, Wall> implements Wa
         Wall wall = new Wall();
         wall.setUserId(Integer.valueOf(userId));
         wall.setWallContent(wallApplyDto.getWallContent());
-        if (wallApplyDto.getWallImages()!=null){
+        if (StringUtils.isNotBlank(wallApplyDto.getWallImages())){
             wall.setWallImages(wallApplyDto.getWallImages());
         }
         wall.setAuditState(0);
