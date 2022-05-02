@@ -243,6 +243,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             }
             goods.setGoodsStatus(true);
             goodsMapper.updateById(goods);
+            letterService.addNotice(
+                    new LetterAddDto(Integer.valueOf(userId),
+                            "你的商品 "+goods.getGoodsName()+" 商品编号："+goodsId+" 已重新上架"));
             return Result.succ("上架成功");
         } catch (Exception e) {
             return Result.fail(e.toString());
@@ -269,7 +272,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             goodsMapper.updateById(goods);
             letterService.addNotice(
                     new LetterAddDto(Integer.valueOf(userId),
-                            "你的商品 "+goods.getGoodsName()+" 已被自己下架"));
+                            "你的商品 "+goods.getGoodsName()+" 商品编号："+goodsId+" 已被自己下架"));
             return Result.succ("下架成功");
         } catch (Exception e) {
             return Result.fail(e.toString());
