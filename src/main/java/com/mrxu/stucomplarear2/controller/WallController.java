@@ -66,6 +66,24 @@ public class WallController {
         return Result.succ(map);
     }
 
+    @ApiOperation("获取表白墙总数")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/getWallTotal")
+    public Result getWallTotal() {
+        Result result= wallService.getWallTotal();
+        return result;
+    }
+
+
+    @ApiOperation("表白墙分类统计")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/getWallData")
+    public Result getWallData() {
+        Result result = wallService.getWallData();
+        return result;
+    }
+
+
     @ApiOperation("个人墙列表")
     @RequiresRoles("user")
     @GetMapping("/myWallList")

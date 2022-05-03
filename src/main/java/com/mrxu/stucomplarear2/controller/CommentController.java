@@ -5,6 +5,8 @@ import com.mrxu.stucomplarear2.dto.CommentDto;
 import com.mrxu.stucomplarear2.service.CommentService;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import io.swagger.annotations.ApiOperation;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,4 +52,13 @@ public class CommentController {
 
         return commentService.getMyList(page, size,request);
     }
+
+    @ApiOperation("获取评论总数")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/getCommentTotal")
+    public Result getCommentTotal() {
+        Result result= commentService.getCommentTotal();
+        return result;
+    }
+
 }

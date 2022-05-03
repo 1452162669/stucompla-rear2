@@ -6,6 +6,7 @@ import com.mrxu.stucomplarear2.dto.OrderAddDto;
 import com.mrxu.stucomplarear2.service.MarketOrderService;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import io.swagger.annotations.ApiOperation;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +85,13 @@ public class MarketOrderController {
     }
 
 
+    @ApiOperation("获取订单总数")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/getOrderTotal")
+    public Result getOrderTotal() {
+        Result result= marketOrderService.getOrderTotal();
+        return result;
+    }
 
 
 }

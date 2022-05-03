@@ -38,4 +38,6 @@ public interface UserService extends IService<User> {
     Result lockedUser(Integer userId, String cause);
 
     Result unLockUser(Integer userId);
+
+    Result getUserTotal();
 }

@@ -7,14 +7,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.MarketOrderFindDto;
 import com.mrxu.stucomplarear2.dto.MarketOrderVo;
 import com.mrxu.stucomplarear2.dto.OrderAddDto;
-import com.mrxu.stucomplarear2.entity.*;
+import com.mrxu.stucomplarear2.entity.Goods;
+import com.mrxu.stucomplarear2.entity.MarketOrder;
+import com.mrxu.stucomplarear2.entity.User;
 import com.mrxu.stucomplarear2.mapper.GoodsMapper;
 import com.mrxu.stucomplarear2.mapper.MarketOrderMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.MarketOrderService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -226,6 +227,17 @@ public class MarketOrderServiceImpl extends ServiceImpl<MarketOrderMapper, Marke
             return Result.fail(e.toString());
         }
         return Result.succ("发货成功");
+    }
+
+    @Override
+    public Result getOrderTotal() {
+        try {
+            QueryWrapper<MarketOrder> queryWrapper = new QueryWrapper<>();
+            Integer selectCount = marketOrderMapper.selectCount(queryWrapper);
+            return Result.succ(selectCount);
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
     }
 
     @Override

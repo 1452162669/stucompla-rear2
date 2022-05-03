@@ -144,6 +144,14 @@ public class UserController {
         return Result.succ(map);
     }
 
+    @ApiOperation("获取用户总数")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/getUserTotal")
+    public Result getUserTotal() {
+        Result result= userService.getUserTotal();
+        return result;
+    }
+
     @ApiOperation("获取个人信息")
     @RequiresRoles("user")
     @GetMapping("/info")

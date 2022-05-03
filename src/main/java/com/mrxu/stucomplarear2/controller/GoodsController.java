@@ -96,13 +96,27 @@ public class GoodsController {
         return result;
     }
 
-
-
     @ApiOperation("获取二手商品列表")
     @GetMapping("/getList")
     public Result getList(GoodsFindDto goodsFindDto) {
         System.out.println(goodsFindDto);
         Result result = goodsService.findGoods(goodsFindDto);
+        return result;
+    }
+
+    @ApiOperation("获取商品总数")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/getGoodsTotal")
+    public Result getGoodsTotal() {
+        Result result= goodsService.getGoodsTotal();
+        return result;
+    }
+
+    @ApiOperation("二手上架分类统计")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/getGoodsByCategory")
+    public Result getGoodsByCategory() {
+        Result result= goodsService.getGoodsByCategory();
         return result;
     }
 

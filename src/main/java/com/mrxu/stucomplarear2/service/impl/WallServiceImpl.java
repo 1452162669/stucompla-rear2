@@ -7,16 +7,21 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.WallApplyDto;
 import com.mrxu.stucomplarear2.dto.WallAuditDto;
 import com.mrxu.stucomplarear2.dto.WallFindDto;
+import com.mrxu.stucomplarear2.entity.Category;
+import com.mrxu.stucomplarear2.entity.Comment;
+import com.mrxu.stucomplarear2.entity.Post;
 import com.mrxu.stucomplarear2.entity.Wall;
 import com.mrxu.stucomplarear2.mapper.WallMapper;
 import com.mrxu.stucomplarear2.service.WallService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
+import com.mrxu.stucomplarear2.utils.response.Result;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -157,5 +162,39 @@ public class WallServiceImpl extends ServiceImpl<WallMapper, Wall> implements Wa
         map.put("pageSize", wallIPage.getSize());//页面大小
         map.put("walls", wallIPage.getRecords());//数据
         return map;
+    }
+
+    @Override
+    public Result getWallTotal() {
+        try {
+            QueryWrapper<Wall> queryWrapper = new QueryWrapper<>();
+            Integer selectCount = wallMapper.selectCount(queryWrapper);
+            return Result.succ(selectCount);
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result getWallData() {
+        try {
+            QueryWrapper<Wall> queryWrapper = new QueryWrapper<>();
+            queryWrapper.select("audit_state,count(*) as auditStateCount");
+            queryWrapper.groupBy("audit_state");
+            List<Map<String, Object>> wallList = wallMapper.selectMaps(queryWrapper);
+            for (Map<String, Object> map:wallList){
+                if(map.get("audit_state").equals(0)){
+                    map.put("stateName","未审核");
+                }else if (map.get("audit_state").equals(1)){
+                    map.put("stateName","审核通过");
+                }else if (map.get("audit_state").equals(2)){
+                    map.put("stateName","审核不通过");
+                }
+            }
+            return Result.succ(wallList);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return Result.fail(exception.toString());
+        }
     }
 }

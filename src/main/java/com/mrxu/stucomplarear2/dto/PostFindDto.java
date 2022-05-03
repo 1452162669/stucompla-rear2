@@ -56,4 +56,9 @@ public class PostFindDto {
      * 是否精帖
      */
     private Boolean bestPost;
+
+    /**
+     * 帖子状态
+     */
+    private Integer postStatus;
 }

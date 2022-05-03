@@ -7,13 +7,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.CommentDto;
 import com.mrxu.stucomplarear2.dto.CommentVo;
 import com.mrxu.stucomplarear2.dto.PostVo;
-import com.mrxu.stucomplarear2.entity.*;
+import com.mrxu.stucomplarear2.entity.Category;
+import com.mrxu.stucomplarear2.entity.Comment;
+import com.mrxu.stucomplarear2.entity.Post;
+import com.mrxu.stucomplarear2.entity.User;
 import com.mrxu.stucomplarear2.mapper.CategoryMapper;
 import com.mrxu.stucomplarear2.mapper.CommentMapper;
 import com.mrxu.stucomplarear2.mapper.PostMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.CommentService;
-import com.mrxu.stucomplarear2.utils.Constants;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import org.apache.commons.lang.StringUtils;
@@ -218,6 +220,17 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             }else {
                 return Result.fail("无权操作");
             }
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result getCommentTotal() {
+        try {
+            QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
+            Integer selectCount = commentMapper.selectCount(queryWrapper);
+            return Result.succ(selectCount);
         } catch (Exception e) {
             return Result.fail(e.toString());
         }

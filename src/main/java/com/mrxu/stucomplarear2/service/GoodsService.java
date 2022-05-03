@@ -36,4 +36,8 @@ public interface GoodsService extends IService<Goods> {
     Result putMyGoods(Integer goodsId, HttpServletRequest request);
 
     Result unShelveMyGoods(Integer goodsId, HttpServletRequest request);
+
+    Result getGoodsTotal();
+
+    Result getGoodsByCategory();
 }

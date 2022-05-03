@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.*;
-import com.mrxu.stucomplarear2.entity.*;
+import com.mrxu.stucomplarear2.entity.Goods;
+import com.mrxu.stucomplarear2.entity.GoodsCategory;
+import com.mrxu.stucomplarear2.entity.User;
 import com.mrxu.stucomplarear2.mapper.GoodsCategoryMapper;
 import com.mrxu.stucomplarear2.mapper.GoodsMapper;
 import com.mrxu.stucomplarear2.mapper.MarketOrderMapper;
@@ -245,7 +247,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             goodsMapper.updateById(goods);
             letterService.addNotice(
                     new LetterAddDto(Integer.valueOf(userId),
-                            "你的商品 "+goods.getGoodsName()+" 商品编号："+goodsId+" 已重新上架"));
+                            "你的商品 ”"+goods.getGoodsName()+"“ 商品编号："+goodsId+" 已重新上架"));
             return Result.succ("上架成功");
         } catch (Exception e) {
             return Result.fail(e.toString());
@@ -272,10 +274,40 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             goodsMapper.updateById(goods);
             letterService.addNotice(
                     new LetterAddDto(Integer.valueOf(userId),
-                            "你的商品 "+goods.getGoodsName()+" 商品编号："+goodsId+" 已被自己下架"));
+                            "你的商品 ”"+goods.getGoodsName()+"“ 商品编号："+goodsId+" 已被自己下架"));
             return Result.succ("下架成功");
         } catch (Exception e) {
             return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result getGoodsTotal() {
+        try {
+            QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
+            Integer selectCount = goodsMapper.selectCount(queryWrapper);
+            return Result.succ(selectCount);
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result getGoodsByCategory() {
+        try {
+            QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
+            queryWrapper.select("goods_category_id,count(*) as goodsCategoryIdCount");
+            queryWrapper.groupBy("goods_category_id");
+            queryWrapper.last("limit 8");
+            List<Map<String, Object>> goodsList = goodsMapper.selectMaps(queryWrapper);
+            for (Map<String, Object> map:goodsList){
+                GoodsCategory goodsCategory = goodsCategoryMapper.selectById((Integer) map.get("goods_category_id"));
+                map.put("categoryName",goodsCategory.getCategoryName());
+            }
+            return Result.succ(goodsList);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return Result.fail(exception.toString());
         }
     }
 

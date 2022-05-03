@@ -92,4 +92,9 @@ public class Post implements Serializable {
     @TableField(fill = FieldFill.INSERT)
     private Integer collectNum;
 
+    /**
+     *帖子状态 0-正常 1-锁定
+     */
+    private Integer postStatus;
+
 }

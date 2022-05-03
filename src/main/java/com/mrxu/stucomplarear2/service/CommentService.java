@@ -24,4 +24,6 @@ public interface CommentService extends IService<Comment> {
     Result getMyList(Integer page, Integer size,HttpServletRequest request);
 
     Result deleteCommentByUser(Integer commentId, HttpServletRequest request);
+
+    Result getCommentTotal();
 }

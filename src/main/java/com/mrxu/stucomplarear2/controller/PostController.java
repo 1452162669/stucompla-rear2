@@ -13,6 +13,7 @@ import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.PostService;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import io.swagger.annotations.ApiOperation;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,14 +66,39 @@ public class PostController {
         if (categoryMapper.selectOne(queryWrapper) == null || postEditDto.getTitle().isEmpty() || postEditDto.getDetail().isEmpty()) {
             return Result.fail("种类参数错误");
         }
-        Result result = postService.editPost(request,postEditDto);
+        Result result = postService.editPost(request, postEditDto);
         return result;
     }
-    @ApiOperation("删除帖子")
+
+    @ApiOperation("用户删除帖子")
     @RequiresRoles("user")
     @DeleteMapping("/{postId}")
     public Result deleteMyPost(@PathVariable("postId") Integer postId, HttpServletRequest request) {
-        Result result = postService.deleteMyPost(postId,request);
+        Result result = postService.deleteMyPost(postId, request);
+        return result;
+    }
+
+    @ApiOperation("管理员锁定帖子")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @PostMapping("/lockedPost")
+    public Result lockedPost(Integer postId, String cause) {
+        Result result = postService.lockedPost(postId, cause);
+        return result;
+    }
+
+    @ApiOperation("解锁帖子")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @PostMapping("/unLockPost")
+    public Result unLockPost(Integer postId) {
+        Result result = postService.unLockPost(postId);
+        return result;
+    }
+
+    @ApiOperation("管理员删除帖子")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @DeleteMapping("/deleteByAdmin")
+    public Result deleteByAdmin(Integer postId, String cause) {
+        Result result = postService.deleteByAdmin(postId,cause);
         return result;
     }
 
@@ -83,9 +109,13 @@ public class PostController {
             QueryWrapper<Post> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("post_id", postId);
             Post post = postService.getOne(queryWrapper);
-            if (post==null) {
+            if (post == null) {
                 return Result.fail("帖子不存在");
             }
+            //这里还是交给前端处理，因为就算锁定了，按逻辑要给用户修改的权利
+//            if (post.getPostStatus()==1) {
+//                return Result.fail("该贴已被锁定，如需申诉请联系管理员1452162669@qq.com");
+//            }
             post = postService.updateViewNum(post);
             PostVo postVo = new PostVo();
             BeanUtils.copyProperties(post, postVo);
@@ -117,4 +147,22 @@ public class PostController {
 //        int collectNum = postService.getCollectNum(postId);
         return null;
     }
+
+    @ApiOperation("获取帖子总数")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/getPostTotal")
+    public Result getPostTotal() {
+        Result result= postService.getPostTotal();
+        return result;
+    }
+
+    @ApiOperation("帖子分类统计")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/getPostData")
+    public Result getPostData() {
+        Result result = postService.getPostData();
+        return result;
+    }
+
+
 }

@@ -31,4 +31,6 @@ public interface MarketOrderService extends IService<MarketOrder> {
     Result getMySalesOrders(MarketOrderFindDto marketOrderFindDto, HttpServletRequest request);
 
     Result sendGoods(Integer orderId, HttpServletRequest request);
+
+    Result getOrderTotal();
 }

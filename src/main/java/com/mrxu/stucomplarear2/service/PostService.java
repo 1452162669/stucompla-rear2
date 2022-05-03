@@ -31,4 +31,14 @@ public interface PostService extends IService<Post> {
     Result editPost(HttpServletRequest request, PostEditDto postEditDto);
 
     Result deleteMyPost(Integer postId, HttpServletRequest request);
+
+    Result lockedPost(Integer postId,String cause);
+
+    Result unLockPost(Integer postId);
+
+    Result deleteByAdmin(Integer postId,String cause);
+
+    Result getPostData();
+
+    Result getPostTotal();
 }

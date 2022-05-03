@@ -262,6 +262,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
     }
 
+    @Override
+    public Result getUserTotal() {
+        try {
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            Integer selectCount = userMapper.selectCount(queryWrapper);
+            return Result.succ(selectCount);
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
     /**
      * 验证注册信息是否合规
      *
