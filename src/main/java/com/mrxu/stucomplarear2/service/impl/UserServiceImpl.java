@@ -54,7 +54,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     registerDto.getPassword(), //原始密码
                     registerDto.getUsername(),//用用户名当盐值
                     16)));//加密次数
-            user.setSex(registerDto.getSex());
+//            user.setSex(registerDto.getSex());
             user.setRoleId(1);
             userMapper.insert(user);
             return "注册成功";
@@ -295,9 +295,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (registerDto.getPassword().length() > 16 || registerDto.getPassword().length() < 6) {
             return "密码长度只能在6~16位";
         }
-        if (!registerDto.getSex().equals("男") && !registerDto.getSex().equals("女")) {
-            return "性别参数错误";
-        }
+//        if (!registerDto.getSex().equals("男") && !registerDto.getSex().equals("女") &&registerDto.getSex()!=null) {
+//            return "性别参数错误";
+//        }
         return "OK";
     }
 }

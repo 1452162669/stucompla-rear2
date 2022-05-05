@@ -66,6 +66,20 @@ public class WallController {
         return Result.succ(map);
     }
 
+
+    @ApiOperation("我的墙列表")
+    @RequiresRoles("user")
+    @GetMapping("/myWallList")
+    public Result getmyWallList(Integer pageNum, Integer pageSize,HttpServletRequest request) {
+        WallFindDto wallFindDto = new WallFindDto();
+//        wallFindDto.setAuditState(1);//已审核的内容
+        wallFindDto.setPageNum(pageNum);
+        wallFindDto.setPageSize(pageSize);
+        Result result = wallService.findMyWall(wallFindDto,request);
+        return result;
+    }
+
+
     @ApiOperation("获取表白墙总数")
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @GetMapping("/getWallTotal")
@@ -83,25 +97,25 @@ public class WallController {
         return result;
     }
 
-
-    @ApiOperation("个人墙列表")
-    @RequiresRoles("user")
-    @GetMapping("/myWallList")
-    public Result myWallList(ServletRequest request, Integer auditState, Integer pageNum, Integer pageSize) {
-        HttpServletRequest req = (HttpServletRequest) request;
-        //获取传递过来的accessToken
-        String accessToken = req.getHeader("Authorization");
-        //获取token里面的用户ID
-        String userId = JWTUtil.getUserId(accessToken);
-
-        WallFindDto wallFindDto = new WallFindDto();
-        wallFindDto.setUserId(Integer.valueOf(userId));
-        wallFindDto.setAuditState(auditState);
-        wallFindDto.setPageNum(pageNum);
-        wallFindDto.setPageSize(pageSize);
-        Map<String, Object> map = wallService.findWall(wallFindDto);
-        return Result.succ(map);
-    }
+//
+//    @ApiOperation("个人墙列表")
+//    @RequiresRoles("user")
+//    @GetMapping("/myWallList")
+//    public Result myWallList(ServletRequest request, Integer auditState, Integer pageNum, Integer pageSize) {
+//        HttpServletRequest req = (HttpServletRequest) request;
+//        //获取传递过来的accessToken
+//        String accessToken = req.getHeader("Authorization");
+//        //获取token里面的用户ID
+//        String userId = JWTUtil.getUserId(accessToken);
+//
+//        WallFindDto wallFindDto = new WallFindDto();
+//        wallFindDto.setUserId(Integer.valueOf(userId));
+//        wallFindDto.setAuditState(auditState);
+//        wallFindDto.setPageNum(pageNum);
+//        wallFindDto.setPageSize(pageSize);
+//        Map<String, Object> map = wallService.findWall(wallFindDto);
+//        return Result.succ(map);
+//    }
 
     @ApiOperation("墙列表（管理员页面）")
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)

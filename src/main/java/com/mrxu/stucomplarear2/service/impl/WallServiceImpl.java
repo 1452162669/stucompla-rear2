@@ -7,10 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.WallApplyDto;
 import com.mrxu.stucomplarear2.dto.WallAuditDto;
 import com.mrxu.stucomplarear2.dto.WallFindDto;
-import com.mrxu.stucomplarear2.entity.Category;
-import com.mrxu.stucomplarear2.entity.Comment;
-import com.mrxu.stucomplarear2.entity.Post;
-import com.mrxu.stucomplarear2.entity.Wall;
+import com.mrxu.stucomplarear2.entity.*;
+import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.mapper.WallMapper;
 import com.mrxu.stucomplarear2.service.WallService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
@@ -37,6 +35,8 @@ public class WallServiceImpl extends ServiceImpl<WallMapper, Wall> implements Wa
 
     @Autowired
     private WallMapper wallMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public String apply(WallApplyDto wallApplyDto , HttpServletRequest request) {
@@ -192,6 +192,46 @@ public class WallServiceImpl extends ServiceImpl<WallMapper, Wall> implements Wa
                 }
             }
             return Result.succ(wallList);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return Result.fail(exception.toString());
+        }
+    }
+
+    @Override
+    public Result findMyWall(WallFindDto wallFindDto, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+            if (StringUtils.isNotBlank(userId)){
+                User user=userMapper.selectById(userId);
+                if (user==null){
+                    return Result.fail("用户不存在");
+                }
+            }else {
+                return Result.fail("验证失败");
+            }
+            int pageNum = wallFindDto.getPageNum() == null ? 1 : wallFindDto.getPageNum();
+            int pageSize = wallFindDto.getPageSize() == null ? 8 : wallFindDto.getPageSize();
+            QueryWrapper<Wall> queryWrapper = new QueryWrapper<>();
+
+            queryWrapper.eq("user_id", userId);
+            queryWrapper.orderByDesc("createtime"); //默认申请时间降序
+
+            //当前页 页面大小
+            IPage<Wall> page = new Page<Wall>(pageNum, pageSize);
+
+//        queryWrapper.orderByDesc("audit_time"); //根据审核时间降序排列
+
+            IPage<Wall> wallIPage = wallMapper.selectPage(page, queryWrapper);
+            Map<String, Object> map = new HashMap<>();
+            map.put("current", wallIPage.getCurrent());//当前页
+            map.put("total", wallIPage.getTotal());//总记录数
+            map.put("pages", wallIPage.getPages());//总页数
+            map.put("pageSize", wallIPage.getSize());//页面大小
+            map.put("walls", wallIPage.getRecords());//数据
+            return Result.succ(map);
         } catch (Exception exception) {
             exception.printStackTrace();
             return Result.fail(exception.toString());

@@ -31,4 +31,6 @@ public interface WallService extends IService<Wall> {
     Result getWallTotal();
 
     Result getWallData();
+
+    Result findMyWall(WallFindDto wallFindDto, HttpServletRequest request);
 }
