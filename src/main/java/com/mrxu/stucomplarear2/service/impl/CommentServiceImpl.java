@@ -4,18 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.mrxu.stucomplarear2.dto.CommentDto;
-import com.mrxu.stucomplarear2.dto.CommentVo;
-import com.mrxu.stucomplarear2.dto.PostVo;
-import com.mrxu.stucomplarear2.entity.Category;
-import com.mrxu.stucomplarear2.entity.Comment;
-import com.mrxu.stucomplarear2.entity.Post;
-import com.mrxu.stucomplarear2.entity.User;
+import com.mrxu.stucomplarear2.dto.*;
+import com.mrxu.stucomplarear2.entity.*;
 import com.mrxu.stucomplarear2.mapper.CategoryMapper;
 import com.mrxu.stucomplarear2.mapper.CommentMapper;
 import com.mrxu.stucomplarear2.mapper.PostMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.CommentService;
+import com.mrxu.stucomplarear2.service.LetterService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +19,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +45,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private UserMapper userMapper;
     @Autowired
     private CategoryMapper categoryMapper;
+    @Resource
+    private LetterService letterService;
 
     @Override
     public Result createComment(HttpServletRequest request, CommentDto commentDto) {
@@ -216,6 +215,9 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             if (post.getUserId()==Integer.valueOf(userId)||comment.getUserId()==Integer.valueOf(userId)) {
                 // 发帖人是当前用户 || 评论人是当前用户
                 commentMapper.deleteById(commentId);
+                // 更新评论数
+                post.setCommentNum(post.getCommentNum() - 1);
+                postMapper.updateById(post);
                 return Result.succ("删除成功");
             }else {
                 return Result.fail("无权操作");
@@ -231,6 +233,104 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
             Integer selectCount = commentMapper.selectCount(queryWrapper);
             return Result.succ(selectCount);
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result listComment(CommentFindDto commentFindDto) {
+        try {
+            int pageNum = commentFindDto.getPageNum() == null ? 1 : commentFindDto.getPageNum();
+            int pageSize = commentFindDto.getPageSize() == null ? 4 : commentFindDto.getPageSize();
+            QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
+            if (commentFindDto.getCommentId() != null) {
+                queryWrapper.eq("comment_id", commentFindDto.getCommentId());
+            }
+            if (commentFindDto.getPostId() != null) {
+                queryWrapper.eq("post_id", commentFindDto.getPostId());
+            }
+            if (commentFindDto.getUserId() != null) {
+                queryWrapper.eq("user_id", commentFindDto.getUserId());
+            }
+            if (StringUtils.isNotBlank(commentFindDto.getText())) {
+                queryWrapper.like("text", commentFindDto.getText()); //模糊搜索
+            }
+
+            String sort = commentFindDto.getSort();
+            if ("+comment_id".equals(sort)) {
+                queryWrapper.orderByAsc("comment_id");//根据comment_id升序排列
+            } else if ("-comment_id".equals(sort)) {
+                queryWrapper.orderByDesc("comment_id");
+            } else if ("+post_id".equals(sort)) {
+                queryWrapper.orderByAsc("post_id");
+            } else if ("-post_id".equals(sort)) {
+                queryWrapper.orderByDesc("post_id");
+            } else if ("+user_id".equals(sort)) {
+                queryWrapper.orderByAsc("user_id");
+            } else if ("-user_id".equals(sort)) {
+                queryWrapper.orderByDesc("user_id");
+            } else {
+                queryWrapper.orderByDesc("create_time"); //默认发布时间降序
+            }
+
+            //当前页 页面大小
+            IPage<Comment> page = new Page<Comment>(pageNum, pageSize);
+
+            IPage<Comment> commentIPage = commentMapper.selectPage(page, queryWrapper);
+            Map<String, Object> map = new HashMap<>();
+            map.put("current", commentIPage.getCurrent());//当前页
+            map.put("total", commentIPage.getTotal());//总记录数
+            map.put("pages", commentIPage.getPages());//总页数
+            map.put("pageSize", commentIPage.getSize());//页面大小
+            List<CommentVo> commentVoList = new ArrayList<>();
+            for (Comment comment : commentIPage.getRecords()) {
+                CommentVo commentVo = new CommentVo();
+                BeanUtils.copyProperties(comment, commentVo);
+                //查对应的发布人信息
+                User user = userMapper.selectById(comment.getUserId());
+                commentVo.setUser(user);
+                //查对应的帖子信息
+                Post post = postMapper.selectById(comment.getPostId());
+                PostVo postVo = new PostVo();
+                BeanUtils.copyProperties(post,postVo);
+                commentVo.setPostVo(postVo);
+
+                commentVoList.add(commentVo);
+            }
+
+            map.put("commentList", commentVoList);//数据
+            return Result.succ(map);
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result deleteCommentByAdmin(Integer commentId, String cause) {
+        try {
+            if (commentId == null) {
+                return Result.fail("评论ID不能为空");
+            }
+            Comment comment = commentMapper.selectById(commentId);
+            if (comment == null) {
+                return Result.fail("评论不存在");
+            }
+            if (StringUtils.isBlank(cause)) {
+                return Result.fail("原因不能为空");
+            }
+            Post post = postMapper.selectById(comment.getPostId());
+            //删除评论
+            commentMapper.deleteById(commentId);
+
+            // 更新评论数
+            post.setCommentNum(post.getCommentNum() - 1);
+            postMapper.updateById(post);
+
+            letterService.addNotice(
+                    new LetterAddDto(Integer.valueOf(post.getUserId()),
+                            "你的评论 ”" + comment.getText() + "“ 已被管理员删除，原因：" + cause));
+            return Result.succ("删除成功");
         } catch (Exception e) {
             return Result.fail(e.toString());
         }

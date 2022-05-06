@@ -2,6 +2,7 @@ package com.mrxu.stucomplarear2.controller;
 
 
 import com.mrxu.stucomplarear2.dto.CommentDto;
+import com.mrxu.stucomplarear2.dto.CommentFindDto;
 import com.mrxu.stucomplarear2.service.CommentService;
 import com.mrxu.stucomplarear2.utils.response.Result;
 import io.swagger.annotations.ApiOperation;
@@ -28,15 +29,24 @@ public class CommentController {
     private CommentService commentService;
 
     @ApiOperation("评论")
+    @RequiresRoles("user")
     @PostMapping("/create")
     public Result createComment(HttpServletRequest request, @RequestBody CommentDto commentDto) {
         return commentService.createComment(request, commentDto);
     }
 
     @ApiOperation("用户删除评论")
+    @RequiresRoles("user")
     @DeleteMapping("/{commentId}")
     public Result deleteCommentByUser(@PathVariable("commentId") Integer commentId,HttpServletRequest request) {
         return commentService.deleteCommentByUser(commentId, request);
+    }
+
+    @ApiOperation("管理员删除评论")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @DeleteMapping("deleteByAdmin")
+    public Result deleteCommentByAdmin(Integer commentId, String cause) {
+        return commentService.deleteCommentByAdmin(commentId,cause);
     }
 
     @ApiOperation("帖子的评论列表")
@@ -46,7 +56,15 @@ public class CommentController {
         return commentService.listCommentFromPost(postId, page, size);
     }
 
+    @ApiOperation("评论列表(管理员页面)")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/listByAdmin")
+    public Result listCommentByAdmin(CommentFindDto commentFindDto) {
+        return commentService.listComment(commentFindDto);
+    }
+
     @ApiOperation("我的评论列表")
+    @RequiresRoles("user")
     @GetMapping("/myList/{page}/{size}")
     public Result getMyList(@PathVariable("page") Integer page, @PathVariable("size") Integer size,HttpServletRequest request) {
 

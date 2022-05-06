@@ -1,6 +1,7 @@
 package com.mrxu.stucomplarear2.service;
 
 import com.mrxu.stucomplarear2.dto.CommentDto;
+import com.mrxu.stucomplarear2.dto.CommentFindDto;
 import com.mrxu.stucomplarear2.entity.Comment;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.mrxu.stucomplarear2.utils.response.Result;
@@ -26,4 +27,8 @@ public interface CommentService extends IService<Comment> {
     Result deleteCommentByUser(Integer commentId, HttpServletRequest request);
 
     Result getCommentTotal();
+
+    Result listComment(CommentFindDto commentFindDto);
+
+    Result deleteCommentByAdmin(Integer commentId, String cause);
 }

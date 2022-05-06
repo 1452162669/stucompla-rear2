@@ -38,6 +38,7 @@ public class CommentVo {
     /**
      * 评论人ID
      */
+    private Integer userId;
     private User user;
 
     /**
