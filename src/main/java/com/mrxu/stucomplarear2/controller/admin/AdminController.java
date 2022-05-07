@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -59,7 +60,7 @@ public class AdminController {
     @ApiOperation("添加管理员")
     @RequiresRoles("super")
     @PostMapping("/add")
-    public Result addAdmin(@RequestParam String username, @RequestParam String password, @RequestParam int roleId) {
+    public Result addAdmin(String username, String password, Integer roleId) {
         return adminService.addAdmin(username, password, roleId);
     }
 
@@ -72,6 +73,7 @@ public class AdminController {
     }
 
     @ApiOperation("管理员登出")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @DeleteMapping("/logout")
     @RequiresAuthentication
     public Result logout(HttpServletRequest request) {
@@ -79,5 +81,34 @@ public class AdminController {
         String adminId = JWTUtil.getUserId(token);
         redisUtil.del("Admin" + adminId);
         return Result.succ("退出成功");
+    }
+
+
+    @ApiOperation("修改密码")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @PostMapping("/changePassword")
+    public Result changePassword(String oldPassword, String inPassword, String secondPassword, HttpServletRequest request) {
+        return adminService.changePassword(oldPassword,inPassword,secondPassword,request);
+    }
+
+    @ApiOperation("修改我的用户名")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @PostMapping("/changeMyUsername")
+    public Result changeMyUsername(String username, HttpServletRequest request) {
+        return adminService.changeMyUsername(username,request);
+    }
+
+    @ApiOperation("修改角色")
+    @RequiresRoles(value = {"super"})
+    @PostMapping("/changeRole")
+    public Result changeRole(Integer roleId,Integer adminId) {
+        return adminService.changeRole(adminId,roleId);
+    }
+
+    @ApiOperation("删除管理员")
+    @RequiresRoles(value = {"super"})
+    @DeleteMapping("/deleteAdmin")
+    public Result deleteAdmin(Integer adminId) {
+        return adminService.deleteAdmin(adminId);
     }
 }

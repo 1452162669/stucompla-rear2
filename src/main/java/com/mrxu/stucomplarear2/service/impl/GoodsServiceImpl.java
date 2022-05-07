@@ -298,7 +298,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
             queryWrapper.select("goods_category_id,count(*) as goodsCategoryIdCount");
             queryWrapper.groupBy("goods_category_id");
-            queryWrapper.last("limit 8");
+            queryWrapper.last("limit 5");
             List<Map<String, Object>> goodsList = goodsMapper.selectMaps(queryWrapper);
             for (Map<String, Object> map:goodsList){
                 GoodsCategory goodsCategory = goodsCategoryMapper.selectById((Integer) map.get("goods_category_id"));

@@ -106,7 +106,7 @@ public class UserController {
         }
         String inPassword = String.valueOf(new SimpleHash("SHA-1",
                 loginDto.getPassword(), //输入的原始密码
-                loginDto.getUsername(),//用户Id当盐值
+                userFromDb.getUserId().toString(),//用户Id当盐值
                 16));
         if (!inPassword.equals(userFromDb.getPassword())) {
             return Result.fail("用户名或密码错误！");

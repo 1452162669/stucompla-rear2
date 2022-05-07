@@ -50,13 +50,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (ans.equals("OK")) {
             User user = new User();
             user.setUsername(registerDto.getUsername());
-            user.setPassword(String.valueOf(new SimpleHash("SHA-1",
-                    registerDto.getPassword(), //原始密码
-                    registerDto.getUsername(),//用用户名当盐值
-                    16)));//加密次数
-//            user.setSex(registerDto.getSex());
             user.setRoleId(1);
             userMapper.insert(user);
+
+            user.setPassword(String.valueOf(new SimpleHash("SHA-1",
+                    registerDto.getPassword(), //原始密码
+                    user.getUserId().toString(),//用用户ID当盐值
+                    16)));//加密次数
+            userMapper.updateById(user);
+//            user.setSex(registerDto.getSex());
             return "注册成功";
         }
         return ans;
@@ -87,7 +89,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public String changePassword(ServletRequest request, String oldPassword, String inPassword, String secondPassword) {
-        if (inPassword == null || inPassword == "") {
+        if (StringUtils.isBlank(inPassword)) {
             return "密码不能为空";
         }
         if (!inPassword.equals(secondPassword)) {
@@ -105,11 +107,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         oldPassword = String.valueOf(new SimpleHash("SHA-1",
                 oldPassword, //原始密码
-                user.getUsername(),//用用户名当盐值
+                user.getUserId().toString(),//用用户id当盐值
                 16));
         inPassword = String.valueOf(new SimpleHash("SHA-1",
                 inPassword, //原始密码
-                user.getUsername(),//用用户名当盐值
+                user.getUserId().toString(),//用用户id当盐值
                 16));
         if (!user.getPassword().equals(oldPassword)) {
             return "旧密码不正确";
@@ -207,7 +209,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         newPassword = String.valueOf(new SimpleHash("SHA-1",
                 newPassword,//原始密码
-                user.getUsername(),//用用户名当盐值
+                user.getUserId().toString(),//用用户id当盐值
                 16));
         user.setPassword(newPassword);
         userMapper.updateById(user);

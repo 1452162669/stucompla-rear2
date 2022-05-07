@@ -24,7 +24,7 @@ public interface MarketOrderService extends IService<MarketOrder> {
 
     Result getMyOrder(MarketOrderFindDto marketOrderFindDto, HttpServletRequest request);
 
-    Result deleteOrder(Integer orderId, HttpServletRequest request);
+//    Result deleteOrder(Integer orderId, HttpServletRequest request);
 
     Result receipt(Integer orderId, HttpServletRequest request);
 
@@ -33,4 +33,10 @@ public interface MarketOrderService extends IService<MarketOrder> {
     Result sendGoods(Integer orderId, HttpServletRequest request);
 
     Result getOrderTotal();
+
+    Result applyReturn(Integer orderId, HttpServletRequest request);
+
+    Result auditReturn(Integer orderId,Integer auditState,String cause, HttpServletRequest request);
+
+    Result getOrderList(MarketOrderFindDto marketOrderFindDto);
 }

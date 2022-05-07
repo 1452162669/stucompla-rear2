@@ -36,13 +36,13 @@ public class MarketOrderController {
         return result;
     }
 
-    @ApiOperation("删除订单")
-    @RequiresRoles("user")
-    @DeleteMapping("/{orderId}")
-    public Result deleteOrder(@PathVariable("orderId") Integer orderId, HttpServletRequest request) {
-        Result result = marketOrderService.deleteOrder(orderId, request);
-        return result;
-    }
+//    @ApiOperation("删除订单")
+//    @RequiresRoles("user")
+//    @DeleteMapping("/{orderId}")
+//    public Result deleteOrder(@PathVariable("orderId") Integer orderId, HttpServletRequest request) {
+//        Result result = marketOrderService.deleteOrder(orderId, request);
+//        return result;
+//    }
 
     @ApiOperation("订单支付")
     @RequiresRoles("user")
@@ -68,6 +68,22 @@ public class MarketOrderController {
         return result;
     }
 
+    @ApiOperation("申请退货")
+    @RequiresRoles("user")
+    @PostMapping("/applyReturn/{orderId}")
+    public Result applyReturn(@PathVariable("orderId") Integer orderId, HttpServletRequest request) {
+        Result result = marketOrderService.applyReturn(orderId,request);
+        return result;
+    }
+
+    @ApiOperation("审核退货")
+    @RequiresRoles("user")
+    @PostMapping("/auditReturn")
+    public Result auditReturn(Integer orderId, Integer auditState,String cause, HttpServletRequest request) {
+        Result result = marketOrderService.auditReturn(orderId,auditState,cause,request);
+        return result;
+    }
+
     @ApiOperation("获取我的订单")
     @RequiresRoles("user")
     @GetMapping("/myOrder")
@@ -81,6 +97,15 @@ public class MarketOrderController {
     @GetMapping("/mySalesOrders")
     public Result getMySalesOrders(MarketOrderFindDto marketOrderFindDto, HttpServletRequest request) {
         Result result = marketOrderService.getMySalesOrders(marketOrderFindDto, request);
+        return result;
+    }
+
+
+    @ApiOperation("管理员获取订单列表")
+    @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
+    @GetMapping("/orderList")
+    public Result getOrderList(MarketOrderFindDto marketOrderFindDto) {
+        Result result = marketOrderService.getOrderList(marketOrderFindDto);
         return result;
     }
 

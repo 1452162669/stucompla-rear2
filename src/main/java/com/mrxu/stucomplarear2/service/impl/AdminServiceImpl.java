@@ -3,12 +3,11 @@ package com.mrxu.stucomplarear2.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.AdminFindDto;
 import com.mrxu.stucomplarear2.entity.Admin;
-import com.mrxu.stucomplarear2.entity.Wall;
 import com.mrxu.stucomplarear2.mapper.AdminMapper;
 import com.mrxu.stucomplarear2.service.AdminService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.redis.RedisUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
@@ -17,6 +16,7 @@ import org.apache.shiro.crypto.hash.SimpleHash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,23 +38,36 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     private RedisUtil redisUtil;
 
     @Override
-    public Result addAdmin(String username, String password, int roleId) {
-        //查询是否有重名
-        QueryWrapper<Admin> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", username);
-        if (adminMapper.selectOne(queryWrapper) != null) {
-            return Result.fail("该管理员已存在");
+    public Result addAdmin(String username, String password, Integer roleId) {
+        if (StringUtils.isBlank(username)||StringUtils.isBlank(password)){
+            return Result.fail("账号密码不能为空");
         }
-        //没有重名则添加
-        Admin admin = new Admin();
-        admin.setUsername(username);
-        admin.setPassword(String.valueOf(new SimpleHash("SHA-1",
-                password, //原始密码
-                username,//用用户名当盐值
-                16))); //加密次数
-        admin.setRoleId(roleId);
-        adminMapper.insert(admin);
-        return Result.succ("添加成功");
+        if (password.length() > 16 || password.length() < 6) {
+            return Result.fail("密码长度只能在6~16位");
+        }
+        if (roleId==2||roleId==3){
+            //查询是否有重名
+            QueryWrapper<Admin> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("username", username);
+            if (adminMapper.selectOne(queryWrapper) != null) {
+                return Result.fail("该管理员已存在");
+            }
+            //没有重名则添加
+            Admin admin = new Admin();
+            admin.setUsername(username);
+            admin.setRoleId(roleId);
+            adminMapper.insert(admin);
+
+            admin.setPassword(String.valueOf(new SimpleHash("SHA-1",
+                    password, //原始密码
+                    admin.getAdminId().toString(),//用用户id当盐值
+                    16))); //加密次数
+            adminMapper.updateById(admin);
+            return Result.succ("添加成功");
+        }else {
+            return Result.fail("角色参数错误");
+        }
+
     }
 
     @Override
@@ -62,9 +75,11 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         //查询管理员是否存在
         QueryWrapper<Admin> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", username);
+        Admin admin_temp = adminMapper.selectOne(queryWrapper);
+
         queryWrapper.eq("password", String.valueOf(new SimpleHash("SHA-1",
                 password, //输入的原始密码
-                username,//用户名当盐值
+                admin_temp.getAdminId().toString(),//用户id当盐值
                 16)));
         Admin admin = adminMapper.selectOne(queryWrapper);
         if (admin == null) {
@@ -92,7 +107,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
             queryWrapper.eq("admin_id", adminFindDto.getAdminId());
         }
         if (StringUtils.isNotBlank(adminFindDto.getUsername())) {
-            queryWrapper.eq("username", adminFindDto.getUsername());
+            queryWrapper.like("username", adminFindDto.getUsername());
         }
         if (adminFindDto.getRoleId() != null) {
             queryWrapper.eq("role_id", adminFindDto.getRoleId());
@@ -114,6 +129,106 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         map.put("pageSize", adminIPage.getSize());//页面大小
         map.put("adminList", adminIPage.getRecords());//数据
         return map;
+    }
+
+    @Override
+    public Result changePassword(String oldPassword, String inPassword, String secondPassword, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+            if (StringUtils.isBlank(inPassword)) {
+                return Result.fail("密码不能为空");
+            }
+            if (!inPassword.equals(secondPassword)) {
+                return Result.fail("重复密码不匹配");
+            }
+            if (inPassword.length() > 16 || inPassword.length() < 6) {
+                return Result.fail("密码长度只能在6~16位");
+            }
+            Admin admin = adminMapper.selectById(userId);
+            oldPassword = String.valueOf(new SimpleHash("SHA-1",
+                    oldPassword, //原始密码
+                    admin.getAdminId().toString(),//用用户id当盐值
+                    16));
+            inPassword = String.valueOf(new SimpleHash("SHA-1",
+                    inPassword, //原始密码
+                    admin.getAdminId().toString(),//用用户id当盐值
+                    16));
+            if (!admin.getPassword().equals(oldPassword)) {
+                return Result.fail("旧密码不正确");
+            }
+            admin.setPassword(inPassword);
+            adminMapper.updateById(admin);
+            return Result.succ("修改成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result changeMyUsername(String username, HttpServletRequest request) {
+        try {
+            String accessToken = request.getHeader("Authorization");
+            //获取token里面的用户ID
+            String userId = JWTUtil.getUserId(accessToken);
+
+
+            //应该校验长度
+            if (StringUtils.isBlank(username)) {
+                return Result.fail("用户名不能为空");
+            }
+            //查询是否有重名
+            QueryWrapper<Admin> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("username", username);
+            if (adminMapper.selectOne(queryWrapper) != null) {
+                return Result.fail("该用户名已存在");
+            }
+
+            Admin admin = adminMapper.selectById(userId);
+            admin.setUsername(username);
+            adminMapper.updateById(admin);
+            return Result.succ("修改成功");
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result changeRole(Integer adminId, Integer roleId) {
+        try {
+            if (adminId!=null&&(roleId==2||roleId==3)){
+                Admin admin = adminMapper.selectById(adminId);
+                if (admin==null){
+                    return Result.fail("该管理员不存在");
+                }
+                admin.setRoleId(roleId);
+                adminMapper.updateById(admin);
+                return Result.succ("修改成功");
+            }else {
+                return Result.fail("参数错误");
+            }
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
+    }
+
+    @Override
+    public Result deleteAdmin(Integer adminId) {
+        try {
+            if (adminId!=null){
+                Admin admin = adminMapper.selectById(adminId);
+                if (admin==null){
+                    return Result.fail("该管理员不存在");
+                }
+                adminMapper.deleteById(adminId);
+                return Result.succ("删除成功");
+            }else {
+                return Result.fail("参数错误");
+            }
+        } catch (Exception e) {
+            return Result.fail(e.toString());
+        }
     }
 
 
