@@ -1,7 +1,7 @@
 package com.mrxu.stucomplarear2.mapper;
 
-import com.mrxu.stucomplarear2.entity.Letter;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mrxu.stucomplarear2.entity.Letter;
 import org.springframework.stereotype.Component;
 
 /**

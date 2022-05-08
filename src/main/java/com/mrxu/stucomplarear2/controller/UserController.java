@@ -60,17 +60,17 @@ public class UserController {
     @ApiOperation("重置用户密码")
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @PostMapping("/changePwdByAdmin")
-    public Result changePwdByAdmin(String newPassword, String secondPassword,Integer userId) {
-        Result result = userService.changePwdByAdmin(newPassword, secondPassword,userId);
-       return result;
+    public Result changePwdByAdmin(String newPassword, String secondPassword, Integer userId) {
+        Result result = userService.changePwdByAdmin(newPassword, secondPassword, userId);
+        return result;
     }
 
     @ApiOperation("锁定用户")
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @PostMapping("/lockedUser")
-    public Result lockedUser(Integer userId,String cause) {
+    public Result lockedUser(Integer userId, String cause) {
         Result result = userService.lockedUser(userId, cause);
-       return result;
+        return result;
     }
 
     @ApiOperation("解锁用户")
@@ -78,7 +78,7 @@ public class UserController {
     @PostMapping("/unLockUser")
     public Result unLockUser(Integer userId) {
         Result result = userService.unLockUser(userId);
-       return result;
+        return result;
     }
 
     @ApiOperation("编辑个人信息")
@@ -148,7 +148,7 @@ public class UserController {
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @GetMapping("/getUserTotal")
     public Result getUserTotal() {
-        Result result= userService.getUserTotal();
+        Result result = userService.getUserTotal();
         return result;
     }
 

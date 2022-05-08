@@ -9,17 +9,14 @@ import com.mrxu.stucomplarear2.dto.RegisterDto;
 import com.mrxu.stucomplarear2.dto.UserEditDto;
 import com.mrxu.stucomplarear2.dto.UserFindDto;
 import com.mrxu.stucomplarear2.entity.User;
-import com.mrxu.stucomplarear2.mapper.LetterMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.LetterService;
 import com.mrxu.stucomplarear2.service.UserService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
-import jdk.internal.org.objectweb.asm.tree.TryCatchBlockNode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -177,7 +174,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
             user.setUsername(userEditDto.getUsername());
             user.setSex(userEditDto.getSex());
-            if(StringUtils.isNotBlank(userEditDto.getAvatar())){
+            if (StringUtils.isNotBlank(userEditDto.getAvatar())) {
                 user.setAvatar(userEditDto.getAvatar());
             }
             user.setSignature(userEditDto.getSignature());
@@ -189,7 +186,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public Result changePwdByAdmin(String newPassword, String secondPassword,Integer userId) {
+    public Result changePwdByAdmin(String newPassword, String secondPassword, Integer userId) {
         if (StringUtils.isBlank(newPassword)) {
             return Result.fail("密码不能为空");
         }
@@ -199,11 +196,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (newPassword.length() > 16 || newPassword.length() < 6) {
             return Result.fail("密码长度只能在6~16位");
         }
-        if(userId==null){
+        if (userId == null) {
             return Result.fail("用户ID不能为空");
         }
         User user = userMapper.selectById(userId);
-        if (user==null){
+        if (user == null) {
             return Result.fail("用户不存在");
         }
 
@@ -222,11 +219,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public Result lockedUser(Integer userId, String cause) {
         try {
-            if(userId==null){
+            if (userId == null) {
                 return Result.fail("用户ID不能为空");
             }
             User user = userMapper.selectById(userId);
-            if (user==null){
+            if (user == null) {
                 return Result.fail("用户不存在");
             }
             if (StringUtils.isBlank(cause)) {
@@ -236,7 +233,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userMapper.updateById(user);
             letterService.addNotice(
                     new LetterAddDto(Integer.valueOf(userId),
-                            "你的账号已被管理员锁定，原因："+cause));
+                            "你的账号已被管理员锁定，原因：" + cause));
             return Result.succ("账户已锁定");
         } catch (Exception e) {
             return Result.fail(e.toString());
@@ -246,11 +243,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public Result unLockUser(Integer userId) {
         try {
-            if(userId==null){
+            if (userId == null) {
                 return Result.fail("用户ID不能为空");
             }
             User user = userMapper.selectById(userId);
-            if (user==null){
+            if (user == null) {
                 return Result.fail("用户不存在");
             }
             user.setLocked(false);
@@ -296,6 +293,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         if (registerDto.getPassword().length() > 16 || registerDto.getPassword().length() < 6) {
             return "密码长度只能在6~16位";
+        }
+        if (registerDto.getUsername().length() < 3 || registerDto.getUsername().length() > 10) {
+            return "用户名长度只能在3-10位";
         }
 //        if (!registerDto.getSex().equals("男") && !registerDto.getSex().equals("女") &&registerDto.getSex()!=null) {
 //            return "性别参数错误";

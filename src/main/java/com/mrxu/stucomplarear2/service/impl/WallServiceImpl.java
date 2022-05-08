@@ -7,7 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.WallApplyDto;
 import com.mrxu.stucomplarear2.dto.WallAuditDto;
 import com.mrxu.stucomplarear2.dto.WallFindDto;
-import com.mrxu.stucomplarear2.entity.*;
+import com.mrxu.stucomplarear2.entity.User;
+import com.mrxu.stucomplarear2.entity.Wall;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.mapper.WallMapper;
 import com.mrxu.stucomplarear2.service.WallService;
@@ -47,7 +48,7 @@ public class WallServiceImpl extends ServiceImpl<WallMapper, Wall> implements Wa
         if (userId == null) {
             return "参数错误";
         }
-        if (wallApplyDto.getWallContent() == null) {
+        if (StringUtils.isBlank(wallApplyDto.getWallContent())&&StringUtils.isBlank(wallApplyDto.getWallImages())) {
             return "内容不能为空";
         }
         Wall wall = new Wall();

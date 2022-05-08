@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.CollectFindDto;
-import com.mrxu.stucomplarear2.dto.PostVo;
 import com.mrxu.stucomplarear2.entity.Collect;
 import com.mrxu.stucomplarear2.entity.Post;
 import com.mrxu.stucomplarear2.mapper.CollectMapper;

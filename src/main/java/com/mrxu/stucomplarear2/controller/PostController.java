@@ -50,7 +50,10 @@ public class PostController {
         QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("category_id", postDto.getCategoryId());
         if (categoryMapper.selectOne(queryWrapper) == null || postDto.getTitle().isEmpty() || postDto.getDetail().isEmpty()) {
-            return Result.fail("种类参数错误");
+            return Result.fail("参数错误");
+        }
+        if (postDto.getTitle().length() < 1 || postDto.getTitle().length() > 30) {
+            return Result.fail("标题长度只能在1-30位");
         }
         postService.publishPost(request, postDto);
         return Result.succ(postDto);
@@ -98,7 +101,7 @@ public class PostController {
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @DeleteMapping("/deleteByAdmin")
     public Result deleteByAdmin(Integer postId, String cause) {
-        Result result = postService.deleteByAdmin(postId,cause);
+        Result result = postService.deleteByAdmin(postId, cause);
         return result;
     }
 
@@ -140,19 +143,19 @@ public class PostController {
         Map<String, Object> map = postService.findPostList(postFindDto);
         return Result.succ(map);
     }
-
-    @ApiOperation("获取帖子收藏数量")
-    @GetMapping("/getCollectNum")
-    public Result getCollectNum(Integer postId) {
-//        int collectNum = postService.getCollectNum(postId);
-        return null;
-    }
+//
+//    @ApiOperation("获取帖子收藏数量")
+//    @GetMapping("/getCollectNum")
+//    public Result getCollectNum(Integer postId) {
+////        int collectNum = postService.getCollectNum(postId);
+//        return null;
+//    }
 
     @ApiOperation("获取帖子总数")
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @GetMapping("/getPostTotal")
     public Result getPostTotal() {
-        Result result= postService.getPostTotal();
+        Result result = postService.getPostTotal();
         return result;
     }
 

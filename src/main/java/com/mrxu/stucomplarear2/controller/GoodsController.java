@@ -1,8 +1,13 @@
 package com.mrxu.stucomplarear2.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.mrxu.stucomplarear2.dto.*;
-import com.mrxu.stucomplarear2.entity.*;
+import com.mrxu.stucomplarear2.dto.GoodsAddDto;
+import com.mrxu.stucomplarear2.dto.GoodsEditDto;
+import com.mrxu.stucomplarear2.dto.GoodsFindDto;
+import com.mrxu.stucomplarear2.dto.GoodsVo;
+import com.mrxu.stucomplarear2.entity.Goods;
+import com.mrxu.stucomplarear2.entity.GoodsCategory;
+import com.mrxu.stucomplarear2.entity.User;
 import com.mrxu.stucomplarear2.mapper.GoodsCategoryMapper;
 import com.mrxu.stucomplarear2.mapper.UserMapper;
 import com.mrxu.stucomplarear2.service.GoodsService;
@@ -36,8 +41,6 @@ public class GoodsController {
     private UserMapper userMapper;
     @Autowired
     private GoodsCategoryMapper goodsCategoryMapper;
-    @Autowired
-    private LetterService letterService;
 
     @ApiOperation("发布二手商品")
     @RequiresRoles("user")
@@ -108,7 +111,7 @@ public class GoodsController {
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @GetMapping("/getGoodsTotal")
     public Result getGoodsTotal() {
-        Result result= goodsService.getGoodsTotal();
+        Result result = goodsService.getGoodsTotal();
         return result;
     }
 
@@ -116,7 +119,7 @@ public class GoodsController {
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @GetMapping("/getGoodsByCategory")
     public Result getGoodsByCategory() {
-        Result result= goodsService.getGoodsByCategory();
+        Result result = goodsService.getGoodsByCategory();
         return result;
     }
 

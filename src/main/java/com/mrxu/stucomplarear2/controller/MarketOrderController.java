@@ -8,7 +8,6 @@ import com.mrxu.stucomplarear2.utils.response.Result;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -64,7 +63,7 @@ public class MarketOrderController {
     @RequiresRoles("user")
     @PostMapping("/receipt/{orderId}")
     public Result receipt(@PathVariable("orderId") Integer orderId, HttpServletRequest request) {
-        Result result = marketOrderService.receipt(orderId,request);
+        Result result = marketOrderService.receipt(orderId, request);
         return result;
     }
 
@@ -72,15 +71,15 @@ public class MarketOrderController {
     @RequiresRoles("user")
     @PostMapping("/applyReturn/{orderId}")
     public Result applyReturn(@PathVariable("orderId") Integer orderId, HttpServletRequest request) {
-        Result result = marketOrderService.applyReturn(orderId,request);
+        Result result = marketOrderService.applyReturn(orderId, request);
         return result;
     }
 
     @ApiOperation("审核退货")
     @RequiresRoles("user")
     @PostMapping("/auditReturn")
-    public Result auditReturn(Integer orderId, Integer auditState,String cause, HttpServletRequest request) {
-        Result result = marketOrderService.auditReturn(orderId,auditState,cause,request);
+    public Result auditReturn(Integer orderId, Integer auditState, String cause, HttpServletRequest request) {
+        Result result = marketOrderService.auditReturn(orderId, auditState, cause, request);
         return result;
     }
 
@@ -114,7 +113,7 @@ public class MarketOrderController {
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @GetMapping("/getOrderTotal")
     public Result getOrderTotal() {
-        Result result= marketOrderService.getOrderTotal();
+        Result result = marketOrderService.getOrderTotal();
         return result;
     }
 

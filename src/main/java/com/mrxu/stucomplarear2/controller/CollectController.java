@@ -57,23 +57,8 @@ public class CollectController {
     @ApiOperation("获取收藏列表")
 //    @RequiresRoles("user")
     @GetMapping("/list")
-    public Result listCollect(CollectFindDto collectFindDto){
+    public Result listCollect(CollectFindDto collectFindDto) {
         Result result = collectService.listCollect(collectFindDto);
         return result;
     }
-
-//    @ApiOperation("获取帖子收藏数量")
-//    @GetMapping("/getCollectNum")
-//    public Result getCollectNum(Integer postId) {
-//        if (postId == null) {
-//            Result.fail("参数错误");
-//        }
-//        Post post = postMapper.selectById(postId);
-//        if (post == null) {
-//            return Result.fail("帖子不存在");
-//        } else {
-//            return Result.succ(post.getCollectNum());
-//        }
-//    }
-
 }

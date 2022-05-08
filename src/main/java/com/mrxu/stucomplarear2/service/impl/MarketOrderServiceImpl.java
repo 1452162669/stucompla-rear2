@@ -8,7 +8,6 @@ import com.mrxu.stucomplarear2.dto.LetterAddDto;
 import com.mrxu.stucomplarear2.dto.MarketOrderFindDto;
 import com.mrxu.stucomplarear2.dto.MarketOrderVo;
 import com.mrxu.stucomplarear2.dto.OrderAddDto;
-import com.mrxu.stucomplarear2.entity.Comment;
 import com.mrxu.stucomplarear2.entity.Goods;
 import com.mrxu.stucomplarear2.entity.MarketOrder;
 import com.mrxu.stucomplarear2.entity.User;

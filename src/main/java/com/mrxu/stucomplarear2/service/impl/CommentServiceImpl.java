@@ -5,7 +5,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mrxu.stucomplarear2.dto.*;
-import com.mrxu.stucomplarear2.entity.*;
+import com.mrxu.stucomplarear2.entity.Category;
+import com.mrxu.stucomplarear2.entity.Comment;
+import com.mrxu.stucomplarear2.entity.Post;
+import com.mrxu.stucomplarear2.entity.User;
 import com.mrxu.stucomplarear2.mapper.CategoryMapper;
 import com.mrxu.stucomplarear2.mapper.CommentMapper;
 import com.mrxu.stucomplarear2.mapper.PostMapper;
@@ -58,7 +61,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             if (commentDto.getParentId() != null && commentMapper.selectById(commentDto.getParentId()) == null) {
                 return Result.fail("父评论不存在");
             }
-            if (commentDto.getText() == null || commentDto.getText() == "") {
+            if (StringUtils.isBlank(commentDto.getText())&&StringUtils.isBlank(commentDto.getImages())) {
                 return Result.fail("内容不能为空");
             }
             Comment comment = new Comment();

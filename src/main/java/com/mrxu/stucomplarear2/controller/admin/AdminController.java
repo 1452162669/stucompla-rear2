@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -88,21 +87,21 @@ public class AdminController {
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @PostMapping("/changePassword")
     public Result changePassword(String oldPassword, String inPassword, String secondPassword, HttpServletRequest request) {
-        return adminService.changePassword(oldPassword,inPassword,secondPassword,request);
+        return adminService.changePassword(oldPassword, inPassword, secondPassword, request);
     }
 
     @ApiOperation("修改我的用户名")
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @PostMapping("/changeMyUsername")
     public Result changeMyUsername(String username, HttpServletRequest request) {
-        return adminService.changeMyUsername(username,request);
+        return adminService.changeMyUsername(username, request);
     }
 
     @ApiOperation("修改角色")
     @RequiresRoles(value = {"super"})
     @PostMapping("/changeRole")
-    public Result changeRole(Integer roleId,Integer adminId) {
-        return adminService.changeRole(adminId,roleId);
+    public Result changeRole(Integer roleId, Integer adminId) {
+        return adminService.changeRole(adminId, roleId);
     }
 
     @ApiOperation("删除管理员")

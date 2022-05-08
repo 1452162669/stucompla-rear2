@@ -1,8 +1,7 @@
 package com.mrxu.stucomplarear2.mapper;
 
-import com.mrxu.stucomplarear2.entity.Image;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Select;
+import com.mrxu.stucomplarear2.entity.Image;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 

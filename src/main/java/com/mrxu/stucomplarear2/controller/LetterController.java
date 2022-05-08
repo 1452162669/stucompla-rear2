@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author Mr.Xu
@@ -52,8 +52,8 @@ public class LetterController {
     @ApiOperation("获取当前会话的私信列表")
     @RequiresRoles("user")
     @GetMapping("/letterList/{sessionId}")
-    public Result getLetterListBySessionId(@PathVariable("sessionId") String sessionId,HttpServletRequest request) {
-        Result result = letterService.getLetterListBySessionId(sessionId,request);
+    public Result getLetterListBySessionId(@PathVariable("sessionId") String sessionId, HttpServletRequest request) {
+        Result result = letterService.getLetterListBySessionId(sessionId, request);
         return result;
     }
 

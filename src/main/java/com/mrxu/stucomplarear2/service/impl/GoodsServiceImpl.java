@@ -16,6 +16,7 @@ import com.mrxu.stucomplarear2.service.GoodsService;
 import com.mrxu.stucomplarear2.service.LetterService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
 import com.mrxu.stucomplarear2.utils.response.Result;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,17 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public Result add(GoodsAddDto goodsDto, HttpServletRequest request) {
-        // 要做非空判断
+        if (StringUtils.isBlank(goodsDto.getGoodsName())
+                ||StringUtils.isBlank(goodsDto.getGoodsDetail())
+                ||goodsDto.getGoodsCount()==null
+                ||goodsDto.getGoodsCategoryId()==null
+                ||goodsDto.getGoodsPrice()==null
+                ||StringUtils.isBlank(goodsDto.getGoodsImages())){
+            return Result.fail("请完成必填项");
+        }
+        if (goodsDto.getGoodsName().length()<1||goodsDto.getGoodsName().length()>15){
+            return Result.fail("商品名长度要在1-15位");
+        }
         try {
             Goods goods = new Goods();
             BeanUtils.copyProperties(goodsDto, goods);
@@ -141,6 +152,17 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public Result editGoods(GoodsEditDto goodsEditDto, HttpServletRequest request) {
+        if (StringUtils.isBlank(goodsEditDto.getGoodsName())
+                ||StringUtils.isBlank(goodsEditDto.getGoodsDetail())
+                ||goodsEditDto.getGoodsCount()==null
+                ||goodsEditDto.getGoodsCategoryId()==null
+                ||goodsEditDto.getGoodsPrice()==null
+                ||StringUtils.isBlank(goodsEditDto.getGoodsImages())){
+            return Result.fail("请完成必填项");
+        }
+        if (goodsEditDto.getGoodsName().length()<1||goodsEditDto.getGoodsName().length()>15){
+            return Result.fail("商品名长度要在1-15位");
+        }
         try {
             String accessToken = request.getHeader("Authorization");
             //获取token里面的用户ID

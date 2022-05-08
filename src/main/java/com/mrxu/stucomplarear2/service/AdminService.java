@@ -1,8 +1,8 @@
 package com.mrxu.stucomplarear2.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.mrxu.stucomplarear2.dto.AdminFindDto;
 import com.mrxu.stucomplarear2.entity.Admin;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.mrxu.stucomplarear2.utils.response.Result;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author Mr.Xu

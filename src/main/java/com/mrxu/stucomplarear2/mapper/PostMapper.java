@@ -1,13 +1,8 @@
 package com.mrxu.stucomplarear2.mapper;
 
-import com.mrxu.stucomplarear2.dto.PostPublishDto;
-import com.mrxu.stucomplarear2.entity.Post;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.mrxu.stucomplarear2.utils.response.Result;
+import com.mrxu.stucomplarear2.entity.Post;
 import org.springframework.stereotype.Component;
-
-import javax.servlet.ServletRequest;
-import java.awt.image.RescaleOp;
 
 /**
  * <p>

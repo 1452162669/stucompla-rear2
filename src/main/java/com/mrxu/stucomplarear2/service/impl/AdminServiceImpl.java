@@ -39,13 +39,16 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
 
     @Override
     public Result addAdmin(String username, String password, Integer roleId) {
-        if (StringUtils.isBlank(username)||StringUtils.isBlank(password)){
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
             return Result.fail("账号密码不能为空");
         }
         if (password.length() > 16 || password.length() < 6) {
             return Result.fail("密码长度只能在6~16位");
         }
-        if (roleId==2||roleId==3){
+        if (username.length() > 10 || username.length() < 3) {
+            return Result.fail("用户名长度只能在3-10位");
+        }
+        if (roleId == 2 || roleId == 3) {
             //查询是否有重名
             QueryWrapper<Admin> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("username", username);
@@ -64,7 +67,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
                     16))); //加密次数
             adminMapper.updateById(admin);
             return Result.succ("添加成功");
-        }else {
+        } else {
             return Result.fail("角色参数错误");
         }
 
@@ -173,10 +176,11 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
             //获取token里面的用户ID
             String userId = JWTUtil.getUserId(accessToken);
 
-
-            //应该校验长度
             if (StringUtils.isBlank(username)) {
                 return Result.fail("用户名不能为空");
+            }
+            if (username.length() < 3 || username.length() > 10) {
+                return Result.fail("用户名长度只能在3-10位");
             }
             //查询是否有重名
             QueryWrapper<Admin> queryWrapper = new QueryWrapper<>();
@@ -197,15 +201,15 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     @Override
     public Result changeRole(Integer adminId, Integer roleId) {
         try {
-            if (adminId!=null&&(roleId==2||roleId==3)){
+            if (adminId != null && (roleId == 2 || roleId == 3)) {
                 Admin admin = adminMapper.selectById(adminId);
-                if (admin==null){
+                if (admin == null) {
                     return Result.fail("该管理员不存在");
                 }
                 admin.setRoleId(roleId);
                 adminMapper.updateById(admin);
                 return Result.succ("修改成功");
-            }else {
+            } else {
                 return Result.fail("参数错误");
             }
         } catch (Exception e) {
@@ -216,14 +220,14 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     @Override
     public Result deleteAdmin(Integer adminId) {
         try {
-            if (adminId!=null){
+            if (adminId != null) {
                 Admin admin = adminMapper.selectById(adminId);
-                if (admin==null){
+                if (admin == null) {
                     return Result.fail("该管理员不存在");
                 }
                 adminMapper.deleteById(adminId);
                 return Result.succ("删除成功");
-            }else {
+            } else {
                 return Result.fail("参数错误");
             }
         } catch (Exception e) {

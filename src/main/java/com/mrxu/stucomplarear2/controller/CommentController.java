@@ -38,7 +38,7 @@ public class CommentController {
     @ApiOperation("用户删除评论")
     @RequiresRoles("user")
     @DeleteMapping("/{commentId}")
-    public Result deleteCommentByUser(@PathVariable("commentId") Integer commentId,HttpServletRequest request) {
+    public Result deleteCommentByUser(@PathVariable("commentId") Integer commentId, HttpServletRequest request) {
         return commentService.deleteCommentByUser(commentId, request);
     }
 
@@ -46,7 +46,7 @@ public class CommentController {
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @DeleteMapping("deleteByAdmin")
     public Result deleteCommentByAdmin(Integer commentId, String cause) {
-        return commentService.deleteCommentByAdmin(commentId,cause);
+        return commentService.deleteCommentByAdmin(commentId, cause);
     }
 
     @ApiOperation("帖子的评论列表")
@@ -66,16 +66,16 @@ public class CommentController {
     @ApiOperation("我的评论列表")
     @RequiresRoles("user")
     @GetMapping("/myList/{page}/{size}")
-    public Result getMyList(@PathVariable("page") Integer page, @PathVariable("size") Integer size,HttpServletRequest request) {
+    public Result getMyList(@PathVariable("page") Integer page, @PathVariable("size") Integer size, HttpServletRequest request) {
 
-        return commentService.getMyList(page, size,request);
+        return commentService.getMyList(page, size, request);
     }
 
     @ApiOperation("获取评论总数")
     @RequiresRoles(value = {"admin", "super"}, logical = Logical.OR)
     @GetMapping("/getCommentTotal")
     public Result getCommentTotal() {
-        Result result= commentService.getCommentTotal();
+        Result result = commentService.getCommentTotal();
         return result;
     }
 
