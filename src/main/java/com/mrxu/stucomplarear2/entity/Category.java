@@ -39,20 +39,5 @@ public class Category implements Serializable {
      */
     private String description;
 
-    /**
-     * 帖子数
-     */
-    private Integer postNum;
-
-    /**
-     * 浏览量
-     */
-    private Integer viewNum;
-
-    /**
-     * 图标
-     */
-    private String icon;
-
 
 }

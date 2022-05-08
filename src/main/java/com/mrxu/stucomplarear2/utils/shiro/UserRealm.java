@@ -2,7 +2,6 @@ package com.mrxu.stucomplarear2.utils.shiro;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.mrxu.stucomplarear2.entity.User;
-import com.mrxu.stucomplarear2.service.PermissionService;
 import com.mrxu.stucomplarear2.service.RoleService;
 import com.mrxu.stucomplarear2.service.UserService;
 import com.mrxu.stucomplarear2.utils.jwt.JWTUtil;
@@ -27,8 +26,6 @@ public class UserRealm extends AuthorizingRealm {
     private UserService userService;
     @Resource
     private RoleService roleService;
-    @Resource
-    private PermissionService permissionService;
     @Autowired
     private RedisUtil redisUtil;
 
@@ -51,11 +48,8 @@ public class UserRealm extends AuthorizingRealm {
         User user = userService.getUserByUserId(userId);
         // 从数据库获取用户的角色信息
         Set<String> roles = roleService.getRolesByUserId(user.getUserId());
-        // 从数据库获取用户的权限信息
-        Set<String> permissions = permissionService.getPermissionsByUserId(user.getUserId());
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
         info.setRoles(roles);
-        info.setStringPermissions(permissions);
         return info;
     }
 
