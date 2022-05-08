@@ -1079,10 +1079,4 @@ INSERT INTO `wall` VALUES (20, NULL, '哪有什么春夏秋冬，遇见你就是
 INSERT INTO `wall` VALUES (21, NULL, '哪有什么春夏秋冬，遇见你就是四季如春！！！！！！', '2022-04-17 18:07:49', 0, 0, 0, NULL, NULL, 1, '1650190009635_1515632868632690688.jpeg,1650190013496_1515632884822704128.jpeg,1650190016511_1515632897468530688.jpeg');
 INSERT INTO `wall` VALUES (22, NULL, '哪有什么春夏秋冬，遇见你就是四季如春！！！！！！', '2022-04-17 18:07:49', 0, 0, 0, NULL, NULL, 1, '1650190009635_1515632868632690688.jpeg,1650190013496_1515632884822704128.jpeg,1650190016511_1515632897468530688.jpeg');
 
--- ----------------------------
--- View structure for jbbs_jifen_group_user
--- ----------------------------
-DROP VIEW IF EXISTS `jbbs_jifen_group_user`;
-CREATE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `jbbs_jifen_group_user` AS select (select `tt2`.`id` from `jbbs_jifen_group` `tt2` where (`tt2`.`jifen` <= `t1`.`jifen`) order by `tt2`.`jifen` desc limit 0,1) AS `jifen_groupid`,`t1`.`id` AS `userid` from `jbbs_user` `t1`;
-
 SET FOREIGN_KEY_CHECKS = 1;

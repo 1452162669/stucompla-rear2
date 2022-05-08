@@ -758,10 +758,4 @@ INSERT INTO `wall` VALUES (8, 2, '这位男生好帅啊！', '2021-12-16 14:58:1
 INSERT INTO `wall` VALUES (9, 2, '今天下午在图书馆一楼擦肩而过的女生，想知道她的联系方式！', '2021-12-16 14:58:21', 0, 0, 1, NULL, '2021-12-16 15:00:06', 1);
 INSERT INTO `wall` VALUES (10, 2, '你的过去我没参与，你的未来我不会错过。春夏秋冬经过四季，情深而已，甘愿为你一人沉溺。\r\n\r\n我想，陪你走过春夏秋冬；也愿，和你共度艰难伤痛；更盼，伴你前行相濡与共；但求，初心不改我心你懂。\r\n\r\n有你的存在，我才能在柴米油盐的安然里，过好每一个春夏秋冬。', '2021-12-16 14:58:28', 0, 0, 2, '描述不清晰', '2021-12-16 15:22:58', 1);
 
--- ----------------------------
--- View structure for jbbs_jifen_group_user
--- ----------------------------
-DROP VIEW IF EXISTS `jbbs_jifen_group_user`;
-CREATE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `jbbs_jifen_group_user` AS select (select `tt2`.`id` from `jbbs_jifen_group` `tt2` where (`tt2`.`jifen` <= `t1`.`jifen`) order by `tt2`.`jifen` desc limit 0,1) AS `jifen_groupid`,`t1`.`id` AS `userid` from `jbbs_user` `t1`;
-
 SET FOREIGN_KEY_CHECKS = 1;

@@ -727,10 +727,4 @@ INSERT INTO `wall` VALUES (8, 2, '找180小哥哥', '2021-12-16 14:58:15', 0, 0,
 INSERT INTO `wall` VALUES (9, 2, '找160小姐姐', '2021-12-16 14:58:21', 0, 0, 1, NULL, '2021-12-16 15:00:06', 1);
 INSERT INTO `wall` VALUES (10, 2, '找鼠标', '2021-12-16 14:58:28', 0, 0, 2, '描述不清晰', '2021-12-16 15:22:58', 1);
 
--- ----------------------------
--- View structure for jbbs_jifen_group_user
--- ----------------------------
-DROP VIEW IF EXISTS `jbbs_jifen_group_user`;
-CREATE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `jbbs_jifen_group_user` AS select (select `tt2`.`id` from `jbbs_jifen_group` `tt2` where (`tt2`.`jifen` <= `t1`.`jifen`) order by `tt2`.`jifen` desc limit 0,1) AS `jifen_groupid`,`t1`.`id` AS `userid` from `jbbs_user` `t1`;
-
 SET FOREIGN_KEY_CHECKS = 1;
